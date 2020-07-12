@@ -1,4 +1,5 @@
 import os
+import re
 import requests
 import discord
 import json
@@ -126,15 +127,46 @@ def combQuote(message):
     
     return href
 
-def handleMessage(message):
-    prefix = getMessagePrefix(message)
-    content = getMessageContent(message)
+def isLoneEmoji(message):
+    pattern = re.compile('<:\w*:\d*>$')
+    if pattern.match(message.content) and not message.attachments:
+        return 1
+    else:
+        return 0
+
+def getUserColour(message):
+    bestColour = "#000000"
+    bestRank = 0
+    for role in message.author.roles:
+        if role.position > bestRank and str(role.colour) != "#000000":
+            bestColour = role.colour
+    return bestColour
+
+async def bigmoji(message):
+    id = message.content[1:-1].split(':')[2]
+    imageUrl = "https://cdn.discordapp.com/emojis/" + id
+    e = discord.Embed(description="<" + str(message.author.display_name) + ">", colour=getUserColour(message))
+    e.set_image(url=imageUrl)
+    await message.channel.send("", embed=e)
+    await message.delete()
+    return
+    
+    
+async def handleMessage(message):
+    prefix = getMessagePrefix(message.content)
+    content = getMessageContent(message.content)
     if prefix == "%co":
         return combQuote(content)
-    #elif prefix == "%yt":
-    #    return ytSearch(content)
-    #elif prefix == "%gi":
-    #    return giSearch(content)
+    if isLoneEmoji(message):
+        return await bigmoji(message)
+        
+    #test functions
+    if str(message.guild.id) == "731319735404462253": 
+        print("test mode!")
+        if prefix == "%yt":
+            return ytSearch(content)
+        elif prefix == "%gi":
+            return giSearch(content)
     return
 
 
@@ -151,7 +183,7 @@ async def on_ready():
 async def on_message(message):
     if message.author == client.user:
         return
-    response = handleMessage(message.content)
+    response = await handleMessage(message)
     if response != None:
         await message.channel.send(response)
     else:
