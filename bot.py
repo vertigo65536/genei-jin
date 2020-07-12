@@ -4,7 +4,11 @@ import requests
 import discord
 import json
 import urllib.parse
-from google_images_download import google_images_download
+import wikipedia
+import random
+import google_auth_oauthlib.flow
+import googleapiclient.discovery
+import googleapiclient.errors
 import you
 from bs4 import BeautifulSoup
 from dotenv import load_dotenv
@@ -25,19 +29,26 @@ def getMessageContent(message):
             else:
                 content = content + " " + split[i+1]
     return content
-        
-        
+    
 def ytSearch(message):
-    href = 'https://www.youtube.com/results?search_query=' + urllib.parse.quote(message)
-    page = requests.get(href)
-    soup = BeautifulSoup(page.text, features='html.parser')
-    videos = []
-    for video in soup.findAll('a'):
-        print(video)
-        if 'id' in video and video['id'] == 'video-title':
-            videos.append(video['value'])
-    print(videos)
-    return "test"
+    api_service_name = "youtube"
+    api_version = "v3"
+    client_secrets_file = "YOUR_CLIENT_SECRET_FILE.json"
+    
+    
+    developerKey = os.getenv("YOUTUBE_API_KEY")
+    youtube = googleapiclient.discovery.build(
+        api_service_name, api_version, developerKey=developerKey)
+
+    request = youtube.search().list(
+        part="snippet",
+        maxResults=1,
+        q=message
+    )
+    response = request.execute()
+
+    id = response['items'][0]['id']['videoId']
+    return "https://www.youtube.com/watch?v=" + id
     
 def giSearch(message):
     #gis = GoogleImagesSearch(os.getenv('GOOGLE_IMAGES_API_KEY'), os.getenv('GCS_CX'))
@@ -150,22 +161,34 @@ async def bigmoji(message):
     await message.channel.send("", embed=e)
     await message.delete()
     return
-    
+
+def getWikiPage(searchResult):
+    try:
+        page = wikipedia.page(searchResult)
+        return(page)
+    except wikipedia.DisambiguationError as e:
+        return getWikiPage(random.choice(e.options))
+
+def wikiSearch(message):
+    search = wikipedia.search(message)
+    return getWikiPage(search[0]).url
     
 async def handleMessage(message):
     prefix = getMessagePrefix(message.content)
     content = getMessageContent(message.content)
     if prefix == "%co":
         return combQuote(content)
-    if isLoneEmoji(message):
+    elif isLoneEmoji(message):
         return await bigmoji(message)
+    elif prefix == "%wiki":
+        return wikiSearch(content)
+    elif prefix == "%yt":
+        return ytSearch(content)
         
     #test functions
     if str(message.guild.id) == "731319735404462253": 
-        print("test mode!")
-        if prefix == "%yt":
-            return ytSearch(content)
-        elif prefix == "%gi":
+        print("test function - may not run correctly")
+        if prefix == "%gi":
             return giSearch(content)
     return
 
