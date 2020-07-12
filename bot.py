@@ -10,6 +10,7 @@ import google_auth_oauthlib.flow
 import googleapiclient.discovery
 import googleapiclient.errors
 import you
+from google_images_download import google_images_download
 from bs4 import BeautifulSoup
 from dotenv import load_dotenv
 
@@ -50,30 +51,18 @@ def ytSearch(message):
     id = response['items'][0]['id']['videoId']
     return "https://www.youtube.com/watch?v=" + id
     
-def giSearch(message):
-    #gis = GoogleImagesSearch(os.getenv('GOOGLE_IMAGES_API_KEY'), os.getenv('GCS_CX'))
-
-    #define search params:
-    #_search_params = {
-    #    'q': message,
-    #    'num': 1,
-    #    'safe': 'off'
-    #}
-    #result = gis.search(search_params=_search_params)
-    
-    #print(result)
-    
+async def giSearch(message):
     response = google_images_download.googleimagesdownload()
-    
-    arguments = {"keywords": message,
-                 "limit":4, 
+    content = getMessageContent(message.content)
+    arguments = {"keywords": content,
+                 "limit":1, 
                  "print_urls":True}  
-    print(response.download(arguments))
-    return -1
-        
+    print(response.download(arguments)[0][content][0])
+    await message.channel.send(file=discord.File(str(response.download(arguments)[0][content][0])))
+    return
+
+
 def combQuote(message):
-
-
     ##query comb.io, and retrieve link for the first result
     r = requests.post(
         url='https://comb.io/a/q',
@@ -184,12 +173,12 @@ async def handleMessage(message):
         return wikiSearch(content)
     elif prefix == "%yt":
         return ytSearch(content)
+    elif prefix == "%gi":
+        return await giSearch(message)
         
     #test functions
     if str(message.guild.id) == "731319735404462253": 
         print("test function - may not run correctly")
-        if prefix == "%gi":
-            return giSearch(content)
     return
 
 
