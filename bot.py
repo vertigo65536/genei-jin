@@ -56,8 +56,7 @@ async def giSearch(message):
     content = getMessageContent(message.content)
     arguments = {"keywords": content,
                  "limit":1, 
-                 "print_urls":True}  
-    print(response.download(arguments)[0][content][0])
+                 "print_urls":True}
     await message.channel.send(file=discord.File(str(response.download(arguments)[0][content][0])))
     return
 
@@ -145,7 +144,7 @@ def getUserColour(message):
 async def bigmoji(message):
     id = message.content[1:-1].split(':')[2]
     imageUrl = "https://cdn.discordapp.com/emojis/" + id
-    e = discord.Embed(description="<" + str(message.author.display_name) + ">", colour=getUserColour(message))
+    e = discord.Embed(colour=getUserColour(message))
     e.set_image(url=imageUrl)
     await message.channel.send("", embed=e)
     await message.delete()
