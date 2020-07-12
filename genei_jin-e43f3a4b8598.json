@@ -1,0 +1,12 @@
+{
+  "type": "service_account",
+  "project_id": "genei-jin",
+  "private_key_id": "e43f3a4b8598d5934cb4b94b9471cb85639f8d22",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQC5z+hsJL1lC2+H\nk7exv+5L7N8rK1RT2Jtjwjkmc+IS/GBhD/VAvJljnxnNCgRLhB0TVIzWXzt7IZIF\nB60YXm3gwdGEE9Thqz7tWq3w7OFPeg1lrugbbhaBFsv3US7c3Eqh6ZNoCTyf9c7Y\ntLHf0u/pgmnFOG7T284n/9V2VAbDYj6Vuvlrl0IcrNroycgVnrxAYKdMi+nIcy6J\nUetGWXuGMbMFh57Zp5XLLC1iyhbOTbhpst1Svo/55R3n/2XSJ/EqWeCSSCeDUATG\nBBXXclw3KN84X+/Y5OloJYxoJDUBoY9xTE5wOQF77Bu49/LGGzjQOI28vkCU5A0p\nQozqG+eTAgMBAAECggEALcWZa4phXVLD1pH83jx5Zxqinu+9hioFnT1q9p31QtgI\npeBYeen7nx7CLFAbXr7cqrZZOzWaYWqTncmWSjp4trUH95ErD6wvhCiiUIcJuZpH\nUpUTeC5WPNZwyCunb6CUge4X8bjUxlK28YsRhiFgGBWYGI0eP/IVhqTu4IcyY06T\nqRC1EGsuh0Bx64wp19KuK8edta2VLREyDK1fwv6kCkaHSYGlfg8b173iKS9gUjYA\nwJKgLLFVhjzhxFwjS4ZDqxnHoxB5i4RMylJ53WwCgF/QKkH03/3YSoxk7WOjWUDL\n+s/BmKHiueyFaNBisxUR8wkFCYegKwKcyJ4TXFSNgQKBgQD7+Wh632yuRhG3x5aK\nz1WwBvmgcVwCgbXAT44pa/zo9LnzVJfQCZ7MULrWgxNKtIuPLGQZug2NtXhczYF1\nfZZlbvgL9/xcxtnsxLzKmkHQYpkClc0uqLYJDDUbkhpdJcvD8IOcl/5+Sqn9vZWD\nqC7adjan/Xqyo67MrxEzksQCxQKBgQC8x+RpN6zAMzqUWc8whoff2SbwknHziiCl\n0sPQTxi3+hXKF83TYlsWf97JsgVMdL4N/M9i8PX8Dto7oP60leA19EFPtI3P38MX\nhPgRZK0fTAaXt9oQECv0RQfKfyGuTGtnm77bUjYE6HQcHxEP6w6KXqdyRAKz9Tkw\nD7adLBYGdwKBgQCxWO7npL/KvXiVAH59vsaRuacS/RaEkSUKcTQfBWmh0TXcBUtA\n2rSRG7UVbHY0m3Sq1dSyotgNSI+pyd73gehMBlnBms5dwnv6ANLcSsxNzkfhoOwk\njgxpu9TZTfEOZJ7Rj0QjAHvYCdcxx7EnVEV977wyat9kQn6yg/m4cfFR/QKBgAzS\nOqYWvOnU0N6wdszh5iqC0g02tPyIXg1FEj18kb41AvPVyAnaPTt69cOXDpsRtrK2\nf9NFcD9tNs8j8QiMwUyIyULDjXoXxWU8h6iOwN9GR5BYUTwUDRgq9AuBtOTklcrU\nnhLBM6ADtZcPWRZOrY8iPJcbHV/hgL/N4WYtT1WjAoGAeWGtVeOkyjCNN/NaTFOP\n1L3t8W3qPt3fArauX6BVubRNArgoMyQxgc6uFGABYg+52U9xQ7GHNkD7tE7LAmYN\n57m1iWggCXi5lOUZUXJ670yEBoggklGMlV+RywF2XlL3DkyJT1RTJcNO0WEkcZxw\nXPb2nzvs6QSV2A2tdLe9KzQ=\n-----END PRIVATE KEY-----\n",
+  "client_email": "genei-jin@genei-jin.iam.gserviceaccount.com",
+  "client_id": "103450958130231083053",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/genei-jin%40genei-jin.iam.gserviceaccount.com"
+}
