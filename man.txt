@@ -1,3 +1,5 @@
+>  **%ping:**
+>  returns "pong" and confirms bot is active and replying to messages
 >  **%co:**
 >  returns simpsons/futurama/family guy/rick and morty clip correspondng to quote
 >  **%wiki:**

@@ -188,7 +188,9 @@ def getManPage():
 async def handleMessage(message):
     prefix = getMessagePrefix(message.content)
     content = getMessageContent(message.content)
-    if prefix == "%co":
+    if prefix == "%ping":
+        return "pong"
+    elif prefix == "%co":
         return combQuote(content)
     elif isLoneEmoji(message):
         return await bigmoji(message)
