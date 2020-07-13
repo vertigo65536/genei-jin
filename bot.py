@@ -179,7 +179,7 @@ async def setTopic(message):
     return
     
 def getManPage():
-    f = open("man.txt", "r")
+    f = open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "man.txt"), "r")
     if f.mode == "r":
         return f.read()
     print("Failed to open man file")
