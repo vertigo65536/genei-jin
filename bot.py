@@ -160,7 +160,22 @@ def getWikiPage(searchResult):
 def wikiSearch(message):
     search = wikipedia.search(message)
     return getWikiPage(search[0]).url
+
+async def setTitle(message):
+    newTitle = name=getMessageContent(message.content)
+    await message.guild.edit(name=newTitle)
+    return
     
+async def setChannelTitle(message):
+    newTitle = getMessageContent(message.content)
+    await message.channel.edit(name=str(newTitle))
+    return
+    
+async def setTopic(message):
+    newTopic = getMessageContent(message.content)
+    await message.channel.edit(topic=str(newTopic))
+    return
+
 async def handleMessage(message):
     prefix = getMessagePrefix(message.content)
     content = getMessageContent(message.content)
@@ -174,10 +189,12 @@ async def handleMessage(message):
         return ytSearch(content)
     elif prefix == "%gi":
         return await giSearch(message)
-        
-    #test functions
-    if str(message.guild.id) == "731319735404462253": 
-        print("test function - may not run correctly")
+    elif prefix == "%title":
+        return await setTitle(message)
+    elif prefix == "%ctitle":
+        return await setChannelTitle(message)
+    elif prefix == "%topic":
+        return await setTopic(message)
     return
 
 
