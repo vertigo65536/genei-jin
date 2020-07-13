@@ -57,11 +57,54 @@ def getNthYtVid(query, pageToken):
     response = request.execute()
     return response
 
-def ytSearch(message):
-    response = getNthYtVid(message, "")
+async def createYtPost(message):
+    content = getMessageContent(message.content)
+    response = getNthYtVid(content, "")
+    print(response)
     id = response['items'][0]['id']['videoId']
-    return "https://www.youtube.com/watch?v=" + id
+    createdMessage = await message.channel.send("https://www.youtube.com/watch?v=" + id)
+    prevPageToken = ""
+    nextPageToken = ""
+    if 'prevPageToken' in response.keys():
+        prevPageToken = response['prevPageToken']
+    if 'nextPageToken' in response.keys():
+        nextPageToken = response['nextPageToken']
+    f = open(YOUTUBE_DATABASE, 'a')
+    f.write(str(createdMessage.id) + "," + str(content) + "," + str(prevPageToken) + "," + str(nextPageToken) + "\n")
+    f.close()
+    await addSelectionArrows(createdMessage)
+    return
 
+async def incrementYt(ytMessage, message, operation):
+    if operation == "+":
+        pageToken = ytMessage[3]
+    else:
+        pageToken = ytMessage[2]
+    response = getNthYtVid(ytMessage[1], pageToken)
+    await message.edit(content="https://www.youtube.com/watch?v=" + response['items'][0]['id']['videoId'])
+    updateYtCounter(message.id, response)
+    return
+    
+def updateYtCounter(id, response):
+    with open(YOUTUBE_DATABASE) as csv_file:
+        csv_reader = csv.reader(csv_file, delimiter=',')
+        line_count = 0
+        rows = list(csv_reader)
+        prevPageToken = ""
+        nextPageToken = ""
+        if 'prevPageToken' in response.keys():
+            prevPageToken = response['prevPageToken']
+        if 'nextPageToken' in response.keys():
+            nextPageToken = response['nextPageToken']
+        for i in range(len(rows)):
+            if rows[i-1][0] == str(id):
+                rows[i-1][2] = prevPageToken
+                rows[i-1][3] = nextPageToken
+    with open(YOUTUBE_DATABASE, 'w', newline='\n', encoding='utf-8') as csv_file:
+        writer = csv.writer(csv_file)
+        writer.writerows(list(rows))
+    return
+    
 def giNthSearch(message, n):
     response = google_images_download.googleimagesdownload()
     content = getMessageContent(message.content)
@@ -191,8 +234,8 @@ def getManPage():
     print("Failed to open man file")
     return
 
-def getStoredWikiCounter(id):
-    with open(WIKI_DATABASE) as csv_file:
+def getStoredRowByID(id, file):
+    with open(file) as csv_file:
         csv_reader = csv.reader(csv_file, delimiter=',')
         line_count = 0
         for row in csv_reader:
@@ -259,7 +302,7 @@ async def handleMessage(message):
     elif prefix == "%wiki":
         return await createWikiPost(message)
     elif prefix == "%yt":
-        return ytSearch(content)
+        return await createYtPost(message)
     elif prefix == "%gi":
         return await giSearch(message)
     elif prefix == "%title":
@@ -277,9 +320,12 @@ async def handleMessage(message):
     
 
 async def handleEdit(message, operation):
-    wikiMessage = getStoredWikiCounter(message.id)
+    wikiMessage = getStoredRowByID(message.id, WIKI_DATABASE)
+    ytMessage = getStoredRowByID(message.id, YOUTUBE_DATABASE)
     if wikiMessage != -1:
         await incrementWiki(wikiMessage, message, operation)
+    if ytMessage != -1:
+        await incrementYt(ytMessage, message, operation)
 
 def initDatabases():
     open(YOUTUBE_DATABASE, 'w').close()
