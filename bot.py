@@ -168,12 +168,21 @@ async def setTitle(message):
     
 async def setChannelTitle(message):
     newTitle = getMessageContent(message.content)
+    print(newTitle)
     await message.channel.edit(name=str(newTitle))
+    print("stillgoing")
     return
     
 async def setTopic(message):
     newTopic = getMessageContent(message.content)
     await message.channel.edit(topic=str(newTopic))
+    return
+    
+def getManPage():
+    f = open("man.txt", "r")
+    if f.mode == "r":
+        return f.read()
+    print("Failed to open man file")
     return
 
 async def handleMessage(message):
@@ -195,6 +204,8 @@ async def handleMessage(message):
         return await setChannelTitle(message)
     elif prefix == "%topic":
         return await setTopic(message)
+    elif prefix == "%man" or prefix == "%help":
+        return getManPage()
     return
 
 

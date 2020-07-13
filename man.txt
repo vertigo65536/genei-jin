@@ -1,0 +1,18 @@
+>  **%co:**
+>  returns simpsons/futurama/family guy/rick and morty clip correspondng to quote
+>  **%wiki:**
+>  searches wikipedia and retrieves the first page corresponding to the query
+>  **%yt:**
+>  searches youtube and retrieves the first video corresponding to the query
+>  **gi:**
+>  searches google images and retrieves the first video corresponding to the query
+>  **%title:**
+>  sets the server title
+>  **%ctitle:**
+>  sets the channel title
+>  **%topic:**
+>  sets the channel topic
+>  **%man:**
+>  returns this man page
+>  **%help:**
+>  alias to %man
