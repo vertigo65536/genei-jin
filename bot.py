@@ -10,10 +10,15 @@ import google_auth_oauthlib.flow
 import googleapiclient.discovery
 import googleapiclient.errors
 import you
+import csv
 from google_images_download import google_images_download
 from bs4 import BeautifulSoup
 from dotenv import load_dotenv
 
+
+async def addSelectionArrows(message):
+    await message.add_reaction("⏪")
+    await message.add_reaction("⏩")
 
 def getMessagePrefix(message):
     return message.split()[0]
@@ -30,12 +35,11 @@ def getMessageContent(message):
             else:
                 content = content + " " + split[i+1]
     return content
-    
-def ytSearch(message):
+
+
+def getNthYtVid(query, pageToken):
     api_service_name = "youtube"
-    api_version = "v3"
-    client_secrets_file = "YOUR_CLIENT_SECRET_FILE.json"
-    
+    api_version = "v3"    
     
     developerKey = os.getenv("YOUTUBE_API_KEY")
     youtube = googleapiclient.discovery.build(
@@ -44,22 +48,37 @@ def ytSearch(message):
     request = youtube.search().list(
         part="snippet",
         maxResults=1,
-        q=message
+        order="relevance",
+        pageToken=pageToken,
+        q=query,
+        type="video"
     )
+    
     response = request.execute()
+    return response
 
+def ytSearch(message):
+    response = getNthYtVid(message, "")
     id = response['items'][0]['id']['videoId']
     return "https://www.youtube.com/watch?v=" + id
-    
-async def giSearch(message):
+
+def giNthSearch(message, n):
     response = google_images_download.googleimagesdownload()
     content = getMessageContent(message.content)
     arguments = {"keywords": content,
-                 "limit":1, 
-                 "print_urls":True}
-    await message.channel.send(file=discord.File(str(response.download(arguments)[0][content][0])))
+                 "limit":n,
+                 "offset":n-1,
+                 "no_download":True}
+    response = response.download(arguments)
+    return response[0][content][len(response[0][content]) - 1]
+    
+async def giSearch(message):
+    imgUrl = giNthSearch(message, 1)
+    print(imgUrl)
+    e = discord.Embed()
+    e.set_image(url=imgUrl)
+    await message.channel.send("", embed=e)
     return
-
 
 def combQuote(message):
     ##query comb.io, and retrieve link for the first result
@@ -150,17 +169,6 @@ async def bigmoji(message):
     await message.delete()
     return
 
-def getWikiPage(searchResult):
-    try:
-        page = wikipedia.page(searchResult)
-        return(page)
-    except wikipedia.DisambiguationError as e:
-        return getWikiPage(random.choice(e.options))
-
-def wikiSearch(message):
-    search = wikipedia.search(message)
-    return getWikiPage(search[0]).url
-
 async def setTitle(message):
     newTitle = name=getMessageContent(message.content)
     await message.guild.edit(name=newTitle)
@@ -168,9 +176,7 @@ async def setTitle(message):
     
 async def setChannelTitle(message):
     newTitle = getMessageContent(message.content)
-    print(newTitle)
     await message.channel.edit(name=str(newTitle))
-    print("stillgoing")
     return
     
 async def setTopic(message):
@@ -185,6 +191,62 @@ def getManPage():
     print("Failed to open man file")
     return
 
+def getStoredWikiCounter(id):
+    with open(WIKI_DATABASE) as csv_file:
+        csv_reader = csv.reader(csv_file, delimiter=',')
+        line_count = 0
+        for row in csv_reader:
+            if row[0] == str(id):
+                return row
+        return -1
+        
+def updateWikiCounter(id, newN):
+    with open(WIKI_DATABASE) as csv_file:
+        csv_reader = csv.reader(csv_file, delimiter=',')
+        line_count = 0
+        rows = list(csv_reader)
+        for i in range(len(rows)):
+            if rows[i-1][0] == str(id):
+                rows[i-1][2] = newN
+    with open(WIKI_DATABASE, 'w', newline='\n', encoding='utf-8') as csv_file:
+        writer = csv.writer(csv_file)
+        writer.writerows(list(rows))
+    return
+
+def wikiSearch(message, n):
+    search = wikipedia.search(message)
+    if n >= len(search):
+        n = n - (len(search) * int((float(n) / len(search))))
+    nthSearch = search[n]
+    try:
+        page = wikipedia.page(str(nthSearch), auto_suggest=0).url
+    except wikipedia.DisambiguationError as e:
+        page = "https://en.wikipedia.org/wiki/" + str(nthSearch)
+    return page
+
+async def incrementWiki(wikiMessage, message, operation):
+    if operation == "+":
+        newCounter = int(wikiMessage[2])+1
+    else:
+        newCounter = int(wikiMessage[2])-1
+        if newCounter < 0:
+            newCounter = 0
+    newUrl = wikiSearch(wikiMessage[1], newCounter)
+    await message.edit(content=newUrl)
+    updateWikiCounter(message.id, newCounter)
+    return
+    
+async def createWikiPost(message):
+    n = 0
+    content = getMessageContent(message.content)
+    url = wikiSearch(content, n)
+    createdMessage = await message.channel.send(url)
+    f = open(WIKI_DATABASE, 'a')
+    f.write(str(createdMessage.id) + "," + str(content) + "," + str(n) + "\n")
+    f.close()
+    await addSelectionArrows(createdMessage)
+    return
+
 async def handleMessage(message):
     prefix = getMessagePrefix(message.content)
     content = getMessageContent(message.content)
@@ -195,7 +257,7 @@ async def handleMessage(message):
     elif isLoneEmoji(message):
         return await bigmoji(message)
     elif prefix == "%wiki":
-        return wikiSearch(content)
+        return await createWikiPost(message)
     elif prefix == "%yt":
         return ytSearch(content)
     elif prefix == "%gi":
@@ -208,13 +270,34 @@ async def handleMessage(message):
         return await setTopic(message)
     elif prefix == "%man" or prefix == "%help":
         return getManPage()
+    elif prefix == "%data":
+        m1 = await message.channel.send(str(message))
+        await addSelectionArrows(m1)
     return
+    
 
+async def handleEdit(message, operation):
+    wikiMessage = getStoredWikiCounter(message.id)
+    if wikiMessage != -1:
+        await incrementWiki(wikiMessage, message, operation)
+
+def initDatabases():
+    open(YOUTUBE_DATABASE, 'w').close()
+    open(WIKI_DATABASE, 'w').close()
+    open(GI_DATABASE, 'w').close()
+    return
+    
 
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
 
 client = discord.Client()
+
+YOUTUBE_DATABASE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "youtube.csv")
+WIKI_DATABASE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "wiki.csv")
+GI_DATABASE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "gi.csv")
+
+initDatabases()
 
 @client.event
 async def on_ready():
@@ -229,4 +312,20 @@ async def on_message(message):
         await message.channel.send(response)
     else:
         return
+
+@client.event
+async def on_reaction_add(reaction, user):
+    if reaction.me and reaction.count == 1:
+        return
+    if reaction.message.author == client.user:
+        if str(reaction.emoji) == "\u23e9":
+           operation = "+"
+        elif str(reaction.emoji) == "\u23ea":
+            operation = "-"
+        else:
+            return
+        await handleEdit(reaction.message, operation)
+    await reaction.remove(user)
+    
+
 client.run(TOKEN)
