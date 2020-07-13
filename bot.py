@@ -107,22 +107,53 @@ def updateYtCounter(id, response):
     
 def giNthSearch(message, n):
     response = google_images_download.googleimagesdownload()
-    content = getMessageContent(message.content)
-    arguments = {"keywords": content,
+    #content = getMessageContent(message.content)
+    arguments = {"keywords": message,
                  "limit":n,
                  "offset":n-1,
                  "no_download":True}
     response = response.download(arguments)
-    return response[0][content][len(response[0][content]) - 1]
+    return response[0][message][len(response[0][message]) - 1]
     
-async def giSearch(message):
-    imgUrl = giNthSearch(message, 1)
-    print(imgUrl)
+async def createGiPost(message):
+    content = getMessageContent(message.content)
+    imgUrl = giNthSearch(content, 1)
     e = discord.Embed()
     e.set_image(url=imgUrl)
-    await message.channel.send("", embed=e)
+    createdMessage = await message.channel.send("", embed=e)
+    f = open(GI_DATABASE, 'a')
+    f.write(str(createdMessage.id) + "," + str(content) + "," + str(1) + "\n")
+    f.close()
+    await addSelectionArrows(createdMessage)
     return
-
+    
+async def incrementGi(giMessage, message, operation):
+    if operation == "+":
+        newCounter = int(giMessage[2])+1
+    else:
+        newCounter = int(giMessage[2])-1
+        if newCounter < 0:
+            newCounter = 0
+    newUrl = giNthSearch(giMessage[1], newCounter)
+    e = discord.Embed()
+    e.set_image(url=newUrl)
+    await message.edit(embed=e)
+    updateGiCounter(message.id, newCounter)
+    return
+    
+def updateGiCounter(id, newN):
+    with open(GI_DATABASE) as csv_file:
+        csv_reader = csv.reader(csv_file, delimiter=',')
+        line_count = 0
+        rows = list(csv_reader)
+        for i in range(len(rows)):
+            if rows[i-1][0] == str(id):
+                rows[i-1][2] = newN
+    with open(GI_DATABASE, 'w', newline='\n', encoding='utf-8') as csv_file:
+        writer = csv.writer(csv_file)
+        writer.writerows(list(rows))
+    return
+    
 def combQuote(message):
     ##query comb.io, and retrieve link for the first result
     r = requests.post(
@@ -304,7 +335,7 @@ async def handleMessage(message):
     elif prefix == "%yt":
         return await createYtPost(message)
     elif prefix == "%gi":
-        return await giSearch(message)
+        return await createGiPost(message)
     elif prefix == "%title":
         return await setTitle(message)
     elif prefix == "%ctitle":
@@ -322,10 +353,13 @@ async def handleMessage(message):
 async def handleEdit(message, operation):
     wikiMessage = getStoredRowByID(message.id, WIKI_DATABASE)
     ytMessage = getStoredRowByID(message.id, YOUTUBE_DATABASE)
+    giMessage = getStoredRowByID(message.id, GI_DATABASE)
     if wikiMessage != -1:
         await incrementWiki(wikiMessage, message, operation)
     if ytMessage != -1:
         await incrementYt(ytMessage, message, operation)
+    if giMessage != -1:
+        await incrementGi(giMessage, message, operation)
 
 def initDatabases():
     open(YOUTUBE_DATABASE, 'w').close()
