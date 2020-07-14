@@ -11,6 +11,7 @@ import googleapiclient.discovery
 import googleapiclient.errors
 import you
 import csv
+from pokedex import pokedex
 from google_images_download import google_images_download
 from bs4 import BeautifulSoup
 from dotenv import load_dotenv
@@ -321,6 +322,30 @@ async def createWikiPost(message):
     await addSelectionArrows(createdMessage)
     return
 
+async def getPokemon(message):
+    content = getMessageContent(message.content)
+    dex = pokedex.Pokedex(version='v1', user_agent='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.116 Safari/537.36')
+    if content.isnumeric():
+        pokemon = dex.get_pokemon_by_number(content)[0]
+    else:
+        pokemon = dex.get_pokemon_by_name(content)[0]
+    e = discord.Embed(title=pokemon['number'] + ": " + pokemon['name'], description=pokemon['description'])
+    e.set_thumbnail(url=pokemon['sprite'])
+    e.add_field(name="Species", value=pokemon['species'], inline=False)
+    e.add_field(name="Types", value=", ".join(pokemon['types']), inline=False)
+    e.add_field(name="Abilities", value=", ".join(pokemon['abilities']['normal']), inline=False)
+    e.add_field(name="Hidden Abilities", value=", ".join(pokemon['abilities']['hidden']), inline=False)
+    e.add_field(name="Egg Group(s)", value=", ".join(pokemon['eggGroups']), inline=False)
+    e.add_field(name="Gender", value=pokemon['gender'], inline=False)
+    e.add_field(name="Height", value=pokemon['height'], inline=False)
+    e.add_field(name="Weight", value=pokemon['weight'], inline=False)
+    e.add_field(name="Generation", value=pokemon['gen'], inline=False)
+    e.add_field(name="Description", value=pokemon['description'], inline=False)
+    #e.set_image(url=pokemon['sprite'])
+    await message.channel.send(embed=e)
+    return
+
+
 async def handleMessage(message):
     prefix = getMessagePrefix(message.content)
     content = getMessageContent(message.content)
@@ -344,9 +369,8 @@ async def handleMessage(message):
         return await setTopic(message)
     elif prefix == "%man" or prefix == "%help":
         return getManPage()
-    elif prefix == "%data":
-        m1 = await message.channel.send(str(message))
-        await addSelectionArrows(m1)
+    elif prefix == "%dex":
+        return await getPokemon(message)
     return
     
 
