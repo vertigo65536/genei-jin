@@ -61,7 +61,6 @@ def getNthYtVid(query, pageToken):
 async def createYtPost(message):
     content = getMessageContent(message.content)
     response = getNthYtVid(content, "")
-    print(response)
     id = response['items'][0]['id']['videoId']
     createdMessage = await message.channel.send("https://www.youtube.com/watch?v=" + id)
     prevPageToken = ""
