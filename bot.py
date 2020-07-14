@@ -348,6 +348,9 @@ async def getPokemon(message):
     await message.channel.send(embed=e)
     return
 
+def getLucky(content):
+    var = requests.get(r'http://www.google.com/search?q="' + urllib.parse.quote(content) + '"&btnI', allow_redirects='false')
+    return var.url.replace("http://www.google.com/url?q=", "")
 
 async def handleMessage(message):
     prefix = getMessagePrefix(message.content)
@@ -374,6 +377,8 @@ async def handleMessage(message):
         return getManPage()
     elif prefix == "%dex":
         return await getPokemon(message)
+    elif prefix == "%lucky":
+        return getLucky(content)
     return
     
 

@@ -16,6 +16,8 @@
 >  sets the channel topic
 >  **%dex:**
 >  searches the pokedex
+>  **%luck:**
+>  Returns the "i'm feeling lucky" result of a google search of a given query
 >  **%man:**
 >  returns this man page
 >  **%help:**
