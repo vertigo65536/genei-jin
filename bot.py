@@ -348,9 +348,13 @@ async def getPokemon(message):
     await message.channel.send(embed=e)
     return
 
-def getLucky(content):
-    var = requests.get(r'http://www.google.com/search?q="' + urllib.parse.quote(content) + '"&btnI', allow_redirects='false')
-    return var.url.replace("http://www.google.com/url?q=", "")
+def getLuckyD(content):
+    var = requests.get(r'https://duckduckgo.com/?q=!' + urllib.parse.quote(content) + "%3Asiteurl", allow_redirects=True)
+    return var.url
+    
+def getLuckyG(content):
+    var = requests.get(r'https://www.google.com/search?btnI=1&q=' + urllib.parse.quote(content), headers = {"Referer": "http://www.google.com/"}, allow_redirects=True)
+    return var.url.replace("https://www.google.com/url?q=", "")
 
 async def handleMessage(message):
     prefix = getMessagePrefix(message.content)
@@ -378,7 +382,7 @@ async def handleMessage(message):
     elif prefix == "%dex":
         return await getPokemon(message)
     elif prefix == "%lucky":
-        return getLucky(content)
+        return getLuckyG(content)
     return
     
 
