@@ -329,12 +329,17 @@ async def getPokemon(message):
         pokemon = dex.get_pokemon_by_number(content)[0]
     else:
         pokemon = dex.get_pokemon_by_name(content)[0]
+    print(pokemon)
+    if len(pokemon['abilities']['hidden']) == 0:
+        hidden = "None"
+    else:
+        hidden = ", ".join(pokemon['abilities']['hidden'])
     e = discord.Embed(title=pokemon['number'] + ": " + pokemon['name'], description=pokemon['description'])
     e.set_thumbnail(url=pokemon['sprite'])
     e.add_field(name="Species", value=pokemon['species'], inline=False)
     e.add_field(name="Types", value=", ".join(pokemon['types']), inline=False)
     e.add_field(name="Abilities", value=", ".join(pokemon['abilities']['normal']), inline=False)
-    e.add_field(name="Hidden Abilities", value=", ".join(pokemon['abilities']['hidden']), inline=False)
+    e.add_field(name="Hidden Abilities", value=hidden, inline=False)
     e.add_field(name="Egg Group(s)", value=", ".join(pokemon['eggGroups']), inline=False)
     e.add_field(name="Gender", value=pokemon['gender'], inline=False)
     e.add_field(name="Height", value=pokemon['height'], inline=False)
