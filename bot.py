@@ -331,7 +331,7 @@ async def getPokemon(message):
         pokemon = dex.get_pokemon_by_name(content)[0]
     print(pokemon)
     if len(pokemon['abilities']['hidden']) == 0:
-        hidden = "None"
+        hidden = "None"ic
     else:
         hidden = ", ".join(pokemon['abilities']['hidden'])
     e = discord.Embed(title=pokemon['number'] + ": " + pokemon['name'], description=pokemon['description'])
@@ -346,7 +346,6 @@ async def getPokemon(message):
     e.add_field(name="Weight", value=pokemon['weight'], inline=False)
     e.add_field(name="Generation", value=pokemon['gen'], inline=False)
     e.add_field(name="Description", value=pokemon['description'], inline=False)
-    #e.set_image(url=pokemon['sprite'])
     await message.channel.send(embed=e)
     return
 
