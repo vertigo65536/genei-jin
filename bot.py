@@ -331,7 +331,7 @@ async def getPokemon(message):
         pokemon = dex.get_pokemon_by_name(content)[0]
     print(pokemon)
     if len(pokemon['abilities']['hidden']) == 0:
-        hidden = "None"ic
+        hidden = "None"
     else:
         hidden = ", ".join(pokemon['abilities']['hidden'])
     e = discord.Embed(title=pokemon['number'] + ": " + pokemon['name'], description=pokemon['description'])
