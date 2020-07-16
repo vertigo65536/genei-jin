@@ -83,27 +83,13 @@ async def incrementYt(ytMessage, message, operation):
         pageToken = ytMessage[2]
     response = getNthYtVid(ytMessage[1], pageToken)
     await message.edit(content="https://www.youtube.com/watch?v=" + response['items'][0]['id']['videoId'])
-    updateYtCounter(message.id, response)
-    return
-    
-def updateYtCounter(id, response):
-    with open(YOUTUBE_DATABASE) as csv_file:
-        csv_reader = csv.reader(csv_file, delimiter=',')
-        line_count = 0
-        rows = list(csv_reader)
-        prevPageToken = ""
-        nextPageToken = ""
-        if 'prevPageToken' in response.keys():
-            prevPageToken = response['prevPageToken']
-        if 'nextPageToken' in response.keys():
-            nextPageToken = response['nextPageToken']
-        for i in range(len(rows)):
-            if rows[i-1][0] == str(id):
-                rows[i-1][2] = prevPageToken
-                rows[i-1][3] = nextPageToken
-    with open(YOUTUBE_DATABASE, 'w', newline='\n', encoding='utf-8') as csv_file:
-        writer = csv.writer(csv_file)
-        writer.writerows(list(rows))
+    prevPageToken = ""
+    nextPageToken = ""
+    if 'prevPageToken' in response.keys():
+        prevPageToken = response['prevPageToken']
+    if 'nextPageToken' in response.keys():
+        nextPageToken = response['nextPageToken']
+    updateCounter(message.id, YOUTUBE_DATABASE, [prevPageToken, nextPageToken])
     return
     
 def giNthSearch(message, n):
@@ -139,20 +125,7 @@ async def incrementGi(giMessage, message, operation):
     e = discord.Embed()
     e.set_image(url=newUrl)
     await message.edit(embed=e)
-    updateGiCounter(message.id, newCounter)
-    return
-    
-def updateGiCounter(id, newN):
-    with open(GI_DATABASE) as csv_file:
-        csv_reader = csv.reader(csv_file, delimiter=',')
-        line_count = 0
-        rows = list(csv_reader)
-        for i in range(len(rows)):
-            if rows[i-1][0] == str(id):
-                rows[i-1][2] = newN
-    with open(GI_DATABASE, 'w', newline='\n', encoding='utf-8') as csv_file:
-        writer = csv.writer(csv_file)
-        writer.writerows(list(rows))
+    updateCounter(message.id, GI_DATABASE, newCounter)
     return
     
 async def createCombioPost(message):
@@ -173,20 +146,7 @@ async def incrementCo(coMessage, message, operation):
             newCounter = 0
     newUrl = coNthSearch(coMessage[1], newCounter)
     await message.edit(content=newUrl)
-    updateCoCounter(message.id, newCounter)
-    return
-    
-def updateCoCounter(id, newN):
-    with open(CO_DATABASE) as csv_file:
-        csv_reader = csv.reader(csv_file, delimiter=',')
-        line_count = 0
-        rows = list(csv_reader)
-        for i in range(len(rows)):
-            if rows[i-1][0] == str(id):
-                rows[i-1][2] = newN
-    with open(CO_DATABASE, 'w', newline='\n', encoding='utf-8') as csv_file:
-        writer = csv.writer(csv_file)
-        writer.writerows(list(rows))
+    updateCounter(message.id, CO_DATABASE, newCounter)
     return
 
 def coNthSearch(message, n):
@@ -248,19 +208,6 @@ def getStoredRowByID(id, file):
             if row[0] == str(id):
                 return row
         return -1
-        
-def updateWikiCounter(id, newN):
-    with open(WIKI_DATABASE) as csv_file:
-        csv_reader = csv.reader(csv_file, delimiter=',')
-        line_count = 0
-        rows = list(csv_reader)
-        for i in range(len(rows)):
-            if rows[i-1][0] == str(id):
-                rows[i-1][2] = newN
-    with open(WIKI_DATABASE, 'w', newline='\n', encoding='utf-8') as csv_file:
-        writer = csv.writer(csv_file)
-        writer.writerows(list(rows))
-    return
 
 def wikiSearch(message, n):
     search = wikipedia.search(message)
@@ -282,7 +229,7 @@ async def incrementWiki(wikiMessage, message, operation):
             newCounter = 0
     newUrl = wikiSearch(wikiMessage[1], newCounter)
     await message.edit(content=newUrl)
-    updateWikiCounter(message.id, newCounter)
+    updateCounter(message.id, WIKI_DATABASE, newCounter)
     return
     
 async def createWikiPost(message):
@@ -294,6 +241,23 @@ async def createWikiPost(message):
     f.write(str(createdMessage.id) + "," + str(content) + "," + str(n) + "\n")
     f.close()
     await addSelectionArrows(createdMessage)
+    return
+    
+def updateCounter(id, databasePath, newN):
+    with open(databasePath) as csv_file:
+        csv_reader = csv.reader(csv_file, delimiter=',')
+        line_count = 0
+        rows = list(csv_reader)
+        for i in range(len(rows)):
+            if rows[i-1][0] == str(id):
+                if isinstance(newN, list):
+                    for j in range(len(newN)):
+                        rows[i-1][j+1] = newN[j-1]
+                else:
+                    rows[i-1][2] = newN
+    with open(databasePath, 'w', newline='\n', encoding='utf-8') as csv_file:
+        writer = csv.writer(csv_file)
+        writer.writerows(list(rows))
     return
 
 async def getPokemon(message):
