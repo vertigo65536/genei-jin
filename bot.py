@@ -155,11 +155,45 @@ def updateGiCounter(id, newN):
         writer.writerows(list(rows))
     return
     
-def combQuote(message):
-    result = combio_api.search(message)[0][1]
+async def createCombioPost(message):
+    content = getMessageContent(message.content)
+    createdMessage = await message.channel.send(coNthSearch(content, 0))
+    f = open(CO_DATABASE, 'a')
+    f.write(str(createdMessage.id) + "," + str(content) + "," + str(1) + "\n")
+    f.close()
+    await addSelectionArrows(createdMessage)
+    return
+   
+async def incrementCo(coMessage, message, operation):
+    if operation == "+":
+        newCounter = int(coMessage[2])+1
+    else:
+        newCounter = int(coMessage[2])-1
+        if newCounter < 0:
+            newCounter = 0
+    newUrl = coNthSearch(coMessage[1], newCounter)
+    await message.edit(content=newUrl)
+    updateCoCounter(message.id, newCounter)
+    return
+    
+def updateCoCounter(id, newN):
+    with open(CO_DATABASE) as csv_file:
+        csv_reader = csv.reader(csv_file, delimiter=',')
+        line_count = 0
+        rows = list(csv_reader)
+        for i in range(len(rows)):
+            if rows[i-1][0] == str(id):
+                rows[i-1][2] = newN
+    with open(CO_DATABASE, 'w', newline='\n', encoding='utf-8') as csv_file:
+        writer = csv.writer(csv_file)
+        writer.writerows(list(rows))
+    return
+
+def coNthSearch(message, n):
+    result = combio_api.search(message)[n][1]
     ts = combio_api.getDefaultTimestamps(result)
     return combio_api.getVideoUrl(result, ts)
-
+    
 def isLoneEmoji(message):
     pattern = re.compile('<:\w*:\d*>$')
     if pattern.match(message.content) and not message.attachments:
@@ -323,7 +357,7 @@ async def handleMessage(message):
     if prefix == "%ping":
         return "pong"
     elif prefix == "%co":
-        return combQuote(content)
+        return await createCombioPost(message)
     elif isLoneEmoji(message):
         return await bigmoji(message)
     elif prefix == "%wiki":
@@ -354,12 +388,15 @@ async def handleEdit(reaction, operation, user):
     wikiMessage = getStoredRowByID(message.id, WIKI_DATABASE)
     ytMessage = getStoredRowByID(message.id, YOUTUBE_DATABASE)
     giMessage = getStoredRowByID(message.id, GI_DATABASE)
+    coMessage = getStoredRowByID(message.id, CO_DATABASE)
     if wikiMessage != -1:
         await incrementWiki(wikiMessage, message, operation)
     if ytMessage != -1:
         await incrementYt(ytMessage, message, operation)
     if giMessage != -1:
         await incrementGi(giMessage, message, operation)
+    if coMessage != -1:
+        await incrementCo(coMessage, message, operation)
     await reaction.remove(user)
     return
 
@@ -368,6 +405,7 @@ def initDatabases():
     open(YOUTUBE_DATABASE, 'w').close()
     open(WIKI_DATABASE, 'w').close()
     open(GI_DATABASE, 'w').close()
+    open(CO_DATABASE, 'w').close()
     return
     
 
@@ -379,6 +417,7 @@ client = discord.Client()
 YOUTUBE_DATABASE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "youtube.csv")
 WIKI_DATABASE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "wiki.csv")
 GI_DATABASE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "gi.csv")
+CO_DATABASE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "co.csv")
 
 initDatabases()
 
