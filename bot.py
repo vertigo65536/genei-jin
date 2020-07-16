@@ -39,7 +39,7 @@ def getMessageContent(message):
     return content
 
 
-def getNthYtVid(query, pageToken):
+def ytSearch(query, pageToken):
     api_service_name = "youtube"
     api_version = "v3"    
     
@@ -59,29 +59,12 @@ def getNthYtVid(query, pageToken):
     response = request.execute()
     return response
 
-async def createYtPost(message):
-    content = getMessageContent(message.content)
-    response = getNthYtVid(content, "")
-    id = response['items'][0]['id']['videoId']
-    createdMessage = await message.channel.send("https://www.youtube.com/watch?v=" + id)
-    prevPageToken = ""
-    nextPageToken = ""
-    if 'prevPageToken' in response.keys():
-        prevPageToken = response['prevPageToken']
-    if 'nextPageToken' in response.keys():
-        nextPageToken = response['nextPageToken']
-    f = open(YOUTUBE_DATABASE, 'a')
-    f.write(str(createdMessage.id) + "," + str(content) + "," + str(prevPageToken) + "," + str(nextPageToken) + "\n")
-    f.close()
-    await addSelectionArrows(createdMessage)
-    return
-
 async def incrementYt(ytMessage, message, operation):
     if operation == "+":
         pageToken = ytMessage[3]
     else:
         pageToken = ytMessage[2]
-    response = getNthYtVid(ytMessage[1], pageToken)
+    response = ytSearch(ytMessage[1], pageToken)
     await message.edit(content="https://www.youtube.com/watch?v=" + response['items'][0]['id']['videoId'])
     prevPageToken = ""
     nextPageToken = ""
@@ -92,7 +75,7 @@ async def incrementYt(ytMessage, message, operation):
     updateCounter(message.id, YOUTUBE_DATABASE, [prevPageToken, nextPageToken])
     return
     
-def giNthSearch(message, n):
+def giSearch(message, n):
     response = google_images_download.googleimagesdownload()
     #content = getMessageContent(message.content)
     arguments = {"keywords": message,
@@ -102,18 +85,6 @@ def giNthSearch(message, n):
     response = response.download(arguments)
     return response[0][message][len(response[0][message]) - 1]
     
-async def createGiPost(message):
-    content = getMessageContent(message.content)
-    imgUrl = giNthSearch(content, 1)
-    e = discord.Embed()
-    e.set_image(url=imgUrl)
-    createdMessage = await message.channel.send("", embed=e)
-    f = open(GI_DATABASE, 'a')
-    f.write(str(createdMessage.id) + "," + str(content) + "," + str(1) + "\n")
-    f.close()
-    await addSelectionArrows(createdMessage)
-    return
-    
 async def incrementGi(giMessage, message, operation):
     if operation == "+":
         newCounter = int(giMessage[2])+1
@@ -121,22 +92,18 @@ async def incrementGi(giMessage, message, operation):
         newCounter = int(giMessage[2])-1
         if newCounter < 0:
             newCounter = 0
-    newUrl = giNthSearch(giMessage[1], newCounter)
+    newUrl = giSearch(giMessage[1], newCounter)
     e = discord.Embed()
     e.set_image(url=newUrl)
     await message.edit(embed=e)
     updateCounter(message.id, GI_DATABASE, newCounter)
     return
+
+def coSearch(message, n):
+    result = combio_api.search(message)[n][1]
+    ts = combio_api.getDefaultTimestamps(result)
+    return combio_api.getVideoUrl(result, ts)
     
-async def createCombioPost(message):
-    content = getMessageContent(message.content)
-    createdMessage = await message.channel.send(coNthSearch(content, 0))
-    f = open(CO_DATABASE, 'a')
-    f.write(str(createdMessage.id) + "," + str(content) + "," + str(1) + "\n")
-    f.close()
-    await addSelectionArrows(createdMessage)
-    return
-   
 async def incrementCo(coMessage, message, operation):
     if operation == "+":
         newCounter = int(coMessage[2])+1
@@ -144,16 +111,92 @@ async def incrementCo(coMessage, message, operation):
         newCounter = int(coMessage[2])-1
         if newCounter < 0:
             newCounter = 0
-    newUrl = coNthSearch(coMessage[1], newCounter)
+    newUrl = coSearch(coMessage[1], newCounter)
     await message.edit(content=newUrl)
     updateCounter(message.id, CO_DATABASE, newCounter)
     return
-
-def coNthSearch(message, n):
-    result = combio_api.search(message)[n][1]
-    ts = combio_api.getDefaultTimestamps(result)
-    return combio_api.getVideoUrl(result, ts)
     
+def wikiSearch(message, n):
+    search = wikipedia.search(message)
+    if n >= len(search):
+        n = n - (len(search) * int((float(n) / len(search))))
+    nthSearch = search[n]
+    try:
+        page = wikipedia.page(str(nthSearch), auto_suggest=0).url
+    except wikipedia.DisambiguationError as e:
+        page = "https://en.wikipedia.org/wiki/" + str(nthSearch)
+    return page
+
+async def incrementWiki(wikiMessage, message, operation):
+    if operation == "+":
+        newCounter = int(wikiMessage[2])+1
+    else:
+        newCounter = int(wikiMessage[2])-1
+        if newCounter < 0:
+            newCounter = 0
+    newUrl = wikiSearch(wikiMessage[1], newCounter)
+    await message.edit(content=newUrl)
+    updateCounter(message.id, WIKI_DATABASE, newCounter)
+    return
+    
+def updateCounter(id, databasePath, newN):
+    with open(databasePath) as csv_file:
+        csv_reader = csv.reader(csv_file, delimiter=',')
+        line_count = 0
+        rows = list(csv_reader)
+        for i in range(len(rows)):
+            if rows[i-1][0] == str(id):
+                if isinstance(newN, list):
+                    for j in range(len(newN)):
+                        rows[i-1][j+2] = newN[j]
+                else:
+                    rows[i-1][2] = newN
+
+    with open(databasePath, 'w', newline='\n', encoding='utf-8') as csv_file:
+        writer = csv.writer(csv_file)
+        writer.writerows(list(rows))
+    return
+    
+async def createSearchPost(message):
+    prefix = getMessagePrefix(message.content)
+    content = getMessageContent(message.content)
+    url = ""
+    embedUrl = ""
+    n = 0
+    if prefix == "%co":
+        url = coSearch(content, n)
+        db = CO_DATABASE
+    elif prefix == "%wiki":
+        url = wikiSearch(content, n)
+        db = WIKI_DATABASE
+    elif prefix == "%yt":
+        response = ytSearch(content, "")
+        url = "https://www.youtube.com/watch?v=" + response['items'][0]['id']['videoId']
+        n = ""
+        if 'prevPageToken' in response.keys():
+            n = n + response['prevPageToken']
+        n = n + ","
+        if 'nextPageToken' in response.keys():
+            n = n + response['nextPageToken']
+        db = YOUTUBE_DATABASE
+    elif prefix == "%gi":
+        n = 0
+        embedUrl = giSearch(content, n)
+        db = GI_DATABASE
+    else:
+        return
+    if embedUrl == "":
+        createdMessage = await message.channel.send(url)
+    else:
+        e = discord.Embed()
+        e.set_image(url=embedUrl)
+        createdMessage = await message.channel.send(url, embed=e)
+    f = open(db, 'a')
+    f.write(str(createdMessage.id) + "," + str(content) + "," + str(n) + "\n")
+    f.close()
+    await addSelectionArrows(createdMessage)
+    return
+
 def isLoneEmoji(message):
     pattern = re.compile('<:\w*:\d*>$')
     if pattern.match(message.content) and not message.attachments:
@@ -208,57 +251,6 @@ def getStoredRowByID(id, file):
             if row[0] == str(id):
                 return row
         return -1
-
-def wikiSearch(message, n):
-    search = wikipedia.search(message)
-    if n >= len(search):
-        n = n - (len(search) * int((float(n) / len(search))))
-    nthSearch = search[n]
-    try:
-        page = wikipedia.page(str(nthSearch), auto_suggest=0).url
-    except wikipedia.DisambiguationError as e:
-        page = "https://en.wikipedia.org/wiki/" + str(nthSearch)
-    return page
-
-async def incrementWiki(wikiMessage, message, operation):
-    if operation == "+":
-        newCounter = int(wikiMessage[2])+1
-    else:
-        newCounter = int(wikiMessage[2])-1
-        if newCounter < 0:
-            newCounter = 0
-    newUrl = wikiSearch(wikiMessage[1], newCounter)
-    await message.edit(content=newUrl)
-    updateCounter(message.id, WIKI_DATABASE, newCounter)
-    return
-    
-async def createWikiPost(message):
-    n = 0
-    content = getMessageContent(message.content)
-    url = wikiSearch(content, n)
-    createdMessage = await message.channel.send(url)
-    f = open(WIKI_DATABASE, 'a')
-    f.write(str(createdMessage.id) + "," + str(content) + "," + str(n) + "\n")
-    f.close()
-    await addSelectionArrows(createdMessage)
-    return
-    
-def updateCounter(id, databasePath, newN):
-    with open(databasePath) as csv_file:
-        csv_reader = csv.reader(csv_file, delimiter=',')
-        line_count = 0
-        rows = list(csv_reader)
-        for i in range(len(rows)):
-            if rows[i-1][0] == str(id):
-                if isinstance(newN, list):
-                    for j in range(len(newN)):
-                        rows[i-1][j+1] = newN[j-1]
-                else:
-                    rows[i-1][2] = newN
-    with open(databasePath, 'w', newline='\n', encoding='utf-8') as csv_file:
-        writer = csv.writer(csv_file)
-        writer.writerows(list(rows))
-    return
 
 async def getPokemon(message):
     content = getMessageContent(message.content)
@@ -320,16 +312,10 @@ async def handleMessage(message):
     content = getMessageContent(message.content)
     if prefix == "%ping":
         return "pong"
-    elif prefix == "%co":
-        return await createCombioPost(message)
+    elif prefix in ["%co", "%wiki", "%yt", "%gi"]:
+        return await createSearchPost(message)
     elif isLoneEmoji(message):
         return await bigmoji(message)
-    elif prefix == "%wiki":
-        return await createWikiPost(message)
-    elif prefix == "%yt":
-        return await createYtPost(message)
-    elif prefix == "%gi":
-        return await createGiPost(message)
     elif prefix == "%title":
         return await setTitle(message)
     elif prefix == "%ctitle":
