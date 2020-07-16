@@ -11,6 +11,7 @@ import googleapiclient.discovery
 import googleapiclient.errors
 import you
 import csv
+import combio_api
 from pokedex import pokedex
 from google_images_download import google_images_download
 from bs4 import BeautifulSoup
@@ -155,69 +156,9 @@ def updateGiCounter(id, newN):
     return
     
 def combQuote(message):
-    ##query comb.io, and retrieve link for the first result
-    r = requests.post(
-        url='https://comb.io/a/q',
-        data={
-            'q': message
-        },
-        headers={
-            'accept': '*/*',
-            'accept-language': 'en-US,en;q=0.9',
-            'content-length': '3',
-            'content-type': 'application/x-www-form-urlencoded',
-            'origin': 'https://comb.io',
-            'referer': 'https://comb.io/',
-            'sec-fetch-dest': 'empty',
-            'sec-fetch-mode': 'cors',
-            'sec-fetch-site': 'same-origin',
-            'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.116 Safari/537.36'
-        })
-    markup = json.loads(r.text[1:])
-    soup = BeautifulSoup(markup['payload']['markup'][0], features='html.parser')
-    for link in soup.findAll('a'):
-        href = link.get('href')
-        break
-    largeID = href.split('/')[2]
-    episodeID = largeID.split('?')[0]
-    timestamp = largeID.split('?')[1][4:]
-    
-    
-    
-    ##retrieve video start and finish time stamps
-    page = requests.get('https://comb.io' + href)
-    soup = BeautifulSoup(page.text, features='html.parser')
-    soup = soup.find(id="s")
-    ts = []
-    for timestamp in soup.findAll('input'):
-        ts.append(timestamp['value'])
-    
-    data = {'media': episodeID}
-    data['ts1'] = ts[0]
-    data['ts2'] = ts[len(ts)-1]
-    
-    
-    ##generate video from link
-    r = requests.post(
-        url='https://comb.io/create-clip',
-        data=data,
-        headers={
-            'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
-            'accept-language': 'en-US,en;q=0.9',
-            'content-length': '80',
-            'content-type': 'application/x-www-form-urlencoded',
-            'origin': 'https://comb.io',
-            'referer': 'https://comb.io'+href,
-            'sec-fetch-dest': 'document',
-            'sec-fetch-mode': 'navigate',
-            'sec-fetch-site': 'same-origin',
-            'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.116 Safari/537.36'
-        })
-    soup = BeautifulSoup(r.text, features='html.parser')
-    for link in soup.findAll('source'):
-        href = link.get('src')
-    
-    return href
+    result = combio_api.search(message)[0][1]
+    ts = combio_api.getDefaultTimestamps(result)
+    return combio_api.getVideoUrl(result, ts)
 
 def isLoneEmoji(message):
     pattern = re.compile('<:\w*:\d*>$')
@@ -356,6 +297,46 @@ def getLuckyG(content):
     var = requests.get(r'https://www.google.com/search?btnI=1&q=' + urllib.parse.quote(content), headers = {"Referer": "http://www.google.com/"}, allow_redirects=True)
     return var.url.replace("https://www.google.com/url?q=", "")
 
+async def sunny(message):
+    
+    soundFile = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'media', 'sunny.mp3')
+    fontFile = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'media', 'Textile Regular.ttf').replace("C:", "").replace("\\", "/")
+    outputFile = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'media', 'sunny.mp4')
+    content = message.content.title()
+    
+    ffmpegCmd = "ffmpeg -y -f lavfi -i color=size=320x240:duration=5:rate=25:color=black -i \"" + soundFile + "\" -vf \"drawtext=fontfile='" + fontFile + "':fontsize=15:fontcolor=white:x=(w-text_w)/2:y=(h-text_h)/2:text=\'" + content + "'\" \"" + outputFile + '"'
+    os.system(ffmpegCmd)
+    print(ffmpegCmd)
+    print(outputFile)
+    file = discord.File(outputFile, filename=content + ".mp4")
+    await message.channel.send(file=file)
+    if os.path.exists(outputFile):
+        os.remove(outputFile)
+
+
+async def sunnySub(message):
+    soundFile = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'media', 'sunny.mp3')
+    fontName = 'Textile'
+    outputFile = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'media', 'sunny.mp4')
+    subtitle = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'media', 'sunny.srt').replace("C:", "").replace("\\", "/")
+    content = message.content.title()
+    
+    f = open(subtitle, "w")
+    f.write("1\n00:00:00,000 --> 00:00:07,000\n" + content)
+    f.close()
+    
+    ffmpegCmd = "ffmpeg -y -f lavfi -i color=size=320x240:duration=5:rate=25:color=black -i \"" + soundFile + "\" -vf \"subtitles=" + subtitle + ":force_style=\'fontsize=15,fontcolor=white,Alignment=10,FontName=" + fontName + "'\" \"" + outputFile + '"'
+    os.system(ffmpegCmd)
+    print(ffmpegCmd)
+    print(outputFile)
+    file = discord.File(outputFile, filename=content + ".mp4")
+    await message.channel.send(file=file)
+    if os.path.exists(outputFile):
+        os.remove(outputFile)
+    if os.path.exists(subtitle):
+        os.remove(subtitle)
+    return
+
 async def handleMessage(message):
     prefix = getMessagePrefix(message.content)
     content = getMessageContent(message.content)
@@ -383,6 +364,8 @@ async def handleMessage(message):
         return await getPokemon(message)
     elif prefix == "%lucky":
         return getLuckyG(content)
+    elif message.content.lower().startswith("the gang "):
+        return await sunnySub(message)
     return
     
 
@@ -396,6 +379,8 @@ async def handleEdit(message, operation):
         await incrementYt(ytMessage, message, operation)
     if giMessage != -1:
         await incrementGi(giMessage, message, operation)
+    await handleEdit(reaction.message, operation)
+
 
 def initDatabases():
     open(YOUTUBE_DATABASE, 'w').close()
@@ -440,7 +425,6 @@ async def on_reaction_add(reaction, user):
             operation = "-"
         else:
             return
-        await handleEdit(reaction.message, operation)
     await reaction.remove(user)
     
 
