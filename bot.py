@@ -307,7 +307,7 @@ async def sunnySub(message):
     f.write("1\n00:00:00,000 --> 00:00:07,000\n" + content)
     f.close()
     
-    ffmpegCmd = "ffmpeg -y -f lavfi -i color=size=320x240:duration=5:rate=25:color=black -i \"" + soundFile + "\" -vf \"subtitles=" + subtitle + ":force_style=\'fontsize=15,fontcolor=white,Alignment=10,FontName=" + fontName + "'\" \"" + outputFile + '"'
+    ffmpegCmd = "ffmpeg -y -f lavfi -i color=size=320x240:duration=5:rate=25:color=black -i \"" + soundFile + "\" -vf \"subtitles=" + subtitle + ":force_style=\'fontsize=30,fontcolor=white,Alignment=10,FontName=" + fontName + "'\" \"" + outputFile + '"'
     os.system(ffmpegCmd)
     file = discord.File(outputFile, filename=content + ".mp4")
     await message.channel.send(file=file)
