@@ -269,7 +269,6 @@ async def getPokemon(message):
         pokemon = dex.get_pokemon_by_number(content)[0]
     else:
         pokemon = dex.get_pokemon_by_name(content)[0]
-    print(pokemon)
     if len(pokemon['abilities']['hidden']) == 0:
         hidden = "None"
     else:
@@ -297,23 +296,6 @@ def getLuckyG(content):
     var = requests.get(r'https://www.google.com/search?btnI=1&q=' + urllib.parse.quote(content), headers = {"Referer": "http://www.google.com/"}, allow_redirects=True)
     return var.url.replace("https://www.google.com/url?q=", "")
 
-async def sunny(message):
-    
-    soundFile = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'media', 'sunny.mp3')
-    fontFile = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'media', 'Textile Regular.ttf').replace("C:", "").replace("\\", "/")
-    outputFile = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'media', 'sunny.mp4')
-    content = message.content.title()
-    
-    ffmpegCmd = "ffmpeg -y -f lavfi -i color=size=320x240:duration=5:rate=25:color=black -i \"" + soundFile + "\" -vf \"drawtext=fontfile='" + fontFile + "':fontsize=15:fontcolor=white:x=(w-text_w)/2:y=(h-text_h)/2:text=\'" + content + "'\" \"" + outputFile + '"'
-    os.system(ffmpegCmd)
-    print(ffmpegCmd)
-    print(outputFile)
-    file = discord.File(outputFile, filename=content + ".mp4")
-    await message.channel.send(file=file)
-    if os.path.exists(outputFile):
-        os.remove(outputFile)
-
-
 async def sunnySub(message):
     soundFile = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'media', 'sunny.mp3')
     fontName = 'Textile'
@@ -327,8 +309,6 @@ async def sunnySub(message):
     
     ffmpegCmd = "ffmpeg -y -f lavfi -i color=size=320x240:duration=5:rate=25:color=black -i \"" + soundFile + "\" -vf \"subtitles=" + subtitle + ":force_style=\'fontsize=15,fontcolor=white,Alignment=10,FontName=" + fontName + "'\" \"" + outputFile + '"'
     os.system(ffmpegCmd)
-    print(ffmpegCmd)
-    print(outputFile)
     file = discord.File(outputFile, filename=content + ".mp4")
     await message.channel.send(file=file)
     if os.path.exists(outputFile):
@@ -369,7 +349,8 @@ async def handleMessage(message):
     return
     
 
-async def handleEdit(message, operation):
+async def handleEdit(reaction, operation, user):
+    message = reaction.message
     wikiMessage = getStoredRowByID(message.id, WIKI_DATABASE)
     ytMessage = getStoredRowByID(message.id, YOUTUBE_DATABASE)
     giMessage = getStoredRowByID(message.id, GI_DATABASE)
@@ -379,7 +360,8 @@ async def handleEdit(message, operation):
         await incrementYt(ytMessage, message, operation)
     if giMessage != -1:
         await incrementGi(giMessage, message, operation)
-    await handleEdit(reaction.message, operation)
+    await reaction.remove(user)
+    return
 
 
 def initDatabases():
@@ -425,7 +407,6 @@ async def on_reaction_add(reaction, user):
             operation = "-"
         else:
             return
-    await reaction.remove(user)
-    
+        await handleEdit(reaction, operation, user)    
 
 client.run(TOKEN)
