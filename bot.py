@@ -61,10 +61,12 @@ def ytSearch(query, pageToken):
 
 async def incrementYt(ytMessage, message, operation):
     if operation == "+":
+        pageToken = ytMessage[4]
+    elif operation == "-":
         pageToken = ytMessage[3]
     else:
-        pageToken = ytMessage[2]
-    response = ytSearch(ytMessage[1], pageToken)
+        pageToken = ""
+    response = ytSearch(ytMessage[2], pageToken)
     await message.edit(content="https://www.youtube.com/watch?v=" + response['items'][0]['id']['videoId'])
     prevPageToken = ""
     nextPageToken = ""
@@ -87,12 +89,14 @@ def giSearch(message, n):
     
 async def incrementGi(giMessage, message, operation):
     if operation == "+":
-        newCounter = int(giMessage[2])+1
-    else:
-        newCounter = int(giMessage[2])-1
+        newCounter = int(giMessage[3])+1
+    elif operation == "-":
+        newCounter = int(giMessage[3])-1
         if newCounter < 0:
             newCounter = 0
-    newUrl = giSearch(giMessage[1], newCounter)
+    else:
+        newCounter = 0
+    newUrl = giSearch(giMessage[2], newCounter)
     e = discord.Embed()
     e.set_image(url=newUrl)
     await message.edit(embed=e)
@@ -106,12 +110,14 @@ def coSearch(message, n):
     
 async def incrementCo(coMessage, message, operation):
     if operation == "+":
-        newCounter = int(coMessage[2])+1
-    else:
-        newCounter = int(coMessage[2])-1
+        newCounter = int(coMessage[3])+1
+    elif operation =="-":
+        newCounter = int(coMessage[3])-1
         if newCounter < 0:
             newCounter = 0
-    newUrl = coSearch(coMessage[1], newCounter)
+    else:
+        newCounter = 0
+    newUrl = coSearch(coMessage[2], newCounter)
     await message.edit(content=newUrl)
     updateCounter(message.id, CO_DATABASE, newCounter)
     return
@@ -129,12 +135,14 @@ def wikiSearch(message, n):
 
 async def incrementWiki(wikiMessage, message, operation):
     if operation == "+":
-        newCounter = int(wikiMessage[2])+1
-    else:
-        newCounter = int(wikiMessage[2])-1
+        newCounter = int(wikiMessage[3])+1
+    elif operation == "-":
+        newCounter = int(wikiMessage[3])-1
         if newCounter < 0:
             newCounter = 0
-    newUrl = wikiSearch(wikiMessage[1], newCounter)
+    else:
+        newCounter = 0
+    newUrl = wikiSearch(wikiMessage[2], newCounter)
     await message.edit(content=newUrl)
     updateCounter(message.id, WIKI_DATABASE, newCounter)
     return
@@ -148,9 +156,23 @@ def updateCounter(id, databasePath, newN):
             if rows[i-1][0] == str(id):
                 if isinstance(newN, list):
                     for j in range(len(newN)):
-                        rows[i-1][j+2] = newN[j]
+                        rows[i-1][j+3] = newN[j]
                 else:
-                    rows[i-1][2] = newN
+                    rows[i-1][3] = newN
+
+    with open(databasePath, 'w', newline='\n', encoding='utf-8') as csv_file:
+        writer = csv.writer(csv_file)
+        writer.writerows(list(rows))
+    return
+    
+def updateQuery(id, databasePath, newQuery):
+    with open(databasePath) as csv_file:
+        csv_reader = csv.reader(csv_file, delimiter=',')
+        line_count = 0
+        rows = list(csv_reader)
+        for i in range(len(rows)):
+            if rows[i-1][1] == str(id):
+                rows[i-1][2] = newQuery
 
     with open(databasePath, 'w', newline='\n', encoding='utf-8') as csv_file:
         writer = csv.writer(csv_file)
@@ -192,10 +214,38 @@ async def createSearchPost(message):
         e.set_image(url=embedUrl)
         createdMessage = await message.channel.send(url, embed=e)
     f = open(db, 'a')
-    f.write(str(createdMessage.id) + "," + str(content) + "," + str(n) + "\n")
+    f.write(str(createdMessage.id) + "," + str(message.id) + "," + str(content) + "," + str(n) + "\n")
     f.close()
     await addSelectionArrows(createdMessage)
     return
+
+async def incrementSearch(row, message, n, prefix):
+    print(message.content)
+    if prefix == "%co":
+        print("test")
+        await incrementCo(row, message, n)
+    elif prefix == "%wiki":
+        await incrementWiki(row, message, n)
+    elif prefix == "%yt":
+        await incrementYt(row, message, n)
+    elif prefix == "%gi":
+        await incrementGi(row, message, n)
+    else:
+        return
+    
+def selectDatabase(content):
+    prefix = getMessagePrefix(content)
+    if prefix == "%co":
+        db = CO_DATABASE
+    elif prefix == "%wiki":
+        db = WIKI_DATABASE
+    elif prefix == "%yt":
+        db = YOUTUBE_DATABASE
+    elif prefix == "%gi":
+        db = GI_DATABASE
+    else:
+        return -1
+    return db
 
 def isLoneEmoji(message):
     pattern = re.compile('<:\w*:\d*>$')
@@ -249,6 +299,15 @@ def getStoredRowByID(id, file):
         line_count = 0
         for row in csv_reader:
             if row[0] == str(id):
+                return row
+        return -1
+        
+def getStoredRowByQueryID(id, file):
+    with open(file) as csv_file:
+        csv_reader = csv.reader(csv_file, delimiter=',')
+        line_count = 0
+        for row in csv_reader:
+            if row[1] == str(id):
                 return row
         return -1
 
@@ -350,6 +409,13 @@ async def handleEdit(reaction, operation, user):
     await reaction.remove(user)
     return
 
+async def editQuery(message):
+    db = selectDatabase(message.content)
+    row = getStoredRowByQueryID(message.id, db)
+    updateQuery(message.id, db, getMessageContent(message.content))
+    row = getStoredRowByQueryID(message.id, db)
+    await incrementSearch(row, await message.channel.fetch_message(row[0]), 0, getMessagePrefix(message.content))
+    
 
 def initDatabases():
     open(YOUTUBE_DATABASE, 'w').close()
@@ -396,6 +462,14 @@ async def on_reaction_add(reaction, user):
             operation = "-"
         else:
             return
-        await handleEdit(reaction, operation, user)    
+        await handleEdit(reaction, operation, user)
+
+@client.event
+async def on_message_edit(before, after):
+    if after.author == client.user:
+        return
+    else:
+        await editQuery(after)
+    return
 
 client.run(TOKEN)
