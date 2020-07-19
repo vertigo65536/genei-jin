@@ -389,6 +389,8 @@ async def handleMessage(message):
         return getLuckyG(content)
     elif message.content.lower().startswith("the gang "):
         return await sunnySub(message)
+    elif prefix == "%canyoufitabillionmothsin32hamptonroad'slivingroom":
+        return "Yes"
     return
     
 
