@@ -12,10 +12,16 @@ import googleapiclient.errors
 import you
 import csv
 import combio_api
+import base64
+import time
+from PIL import Image
 from pokedex import pokedex
 from google_images_download import google_images_download
 from bs4 import BeautifulSoup
 from dotenv import load_dotenv
+from selenium import webdriver  
+from selenium.webdriver.common.keys import Keys  
+from selenium.webdriver.chrome.options import Options 
 
 
 async def addSelectionArrows(message):
@@ -366,6 +372,41 @@ async def sunnySub(message):
         os.remove(subtitle)
     return
 
+async def pokeFusion(message):
+    content = getMessageContent(message.content)
+    pokemon = content.split(" ")
+    dex = pokedex.Pokedex(version='v1', user_agent='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.116 Safari/537.36')
+    if len(pokemon) != 2:
+        return "2 pokemon only"
+    for i in range(len(pokemon)):
+        try:
+            if content.isnumeric():
+                pokemon[i-1] = dex.get_pokemon_by_number(pokemon[i-1])[0]['number']
+            else:
+                pokemon[i-1] = dex.get_pokemon_by_name(pokemon[i-1])[0]['number']
+        except KeyError:
+            return "Pokemon " + str(i) + " does not exist"
+    string = "p1=" + str(pokemon[1]) + "@p2=" + str(pokemon[0]) + "@ss=0"
+    string = string.encode("ascii")
+    encoded = base64.b64encode(string)
+    decoded = encoded.decode("ascii")
+    url = "https://japeal.com/pkm/?efc=" + str(decoded)
+    chrome_options = Options()  
+    chrome_options.add_argument("--headless")  
+    driver = webdriver.Chrome(executable_path=os.getenv('CHROME_PATH'), options=chrome_options)  
+    driver.get(url)
+    #driver.execute_script("window.scrollTo(0, 500)")
+    time.sleep(3)
+    #driver.get_screenshot_as_file("screenshot.png")
+    element = driver.find_element_by_id("shakeit")
+    path = 'foo.png'
+    element.screenshot(path)
+    im = Image.open(path)
+    im = im.crop((50, 50, 220, 220))
+    im.save(path)
+    print("done")
+    return url
+
 async def handleMessage(message):
     prefix = getMessagePrefix(message.content)
     content = getMessageContent(message.content)
@@ -391,6 +432,8 @@ async def handleMessage(message):
         return await sunnySub(message)
     elif prefix == "%canyoufitabillionmothsin32hamptonroad'slivingroom":
         return "Yes"
+    elif prefix == "%pkf":
+        return await pokeFusion(message)
     return
     
 
