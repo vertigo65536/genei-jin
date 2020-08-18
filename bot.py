@@ -366,6 +366,16 @@ async def sunnySub(message):
         os.remove(subtitle)
     return
 
+def getRedditLink(content):
+    content = content.split(" ")
+    message = ""
+    for i in range(len(content)):
+        if content[i].startswith("/r/"):
+           url = "https://old.reddit.com" + content[i]
+           if requests.get(url, allow_redirects=True).url == url:
+               message = message + url + "\n" 
+    return message
+
 async def handleMessage(message):
     prefix = getMessagePrefix(message.content)
     content = getMessageContent(message.content)
@@ -391,7 +401,7 @@ async def handleMessage(message):
         return await sunnySub(message)
     elif prefix == "%canyoufitabillionmothsin32hamptonroad'slivingroom":
         return "Yes"
-    return
+    return getRedditLink(message.content)
     
 
 async def handleEdit(reaction, operation, user):
