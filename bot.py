@@ -311,6 +311,72 @@ def getStoredRowByQueryID(id, file):
                 return row
         return -1
 
+
+def getNewestRow():
+    databases = [YOUTUBE_DATABASE, CO_DATABASE, WIKI_DATABASE, GI_DATABASE]
+    eachNewestRow = [[],[],[],[]]
+    for i in range(len(databases)):
+        with open(databases[i]) as csv_file:
+            csv_reader = csv.reader(csv_file, delimiter=',')
+            data = []
+            for row in csv_reader:
+                data.append(row)
+            if len(data) > 0:
+                eachNewestRow[i] = data[-1]
+    counter = -1
+    for i in range(len(eachNewestRow)):
+        if eachNewestRow[i] == []:
+            continue
+        if eachNewestRow[counter] == []:
+            counter = i
+            continue
+        if eachNewestRow[i][0] > eachNewestRow[counter][0]:
+            counter = i
+    return eachNewestRow[counter]
+
+def newestRow(operation):
+    databases = {
+    "yt": YOUTUBE_DATABASE,
+    "co": CO_DATABASE,
+    "wiki": WIKI_DATABASE,
+    "gi":  GI_DATABASE
+    }
+    eachNewestRow = {}
+    for database in databases:
+        with open(databases[database]) as csv_file:
+            csv_reader = csv.reader(csv_file, delimiter=',')
+            data = []
+            for row in csv_reader:
+                data.append(row)
+            if len(data) > 0:
+                eachNewestRow[database] = data[-1]
+            else:
+                eachNewestRow[database] = -1
+    counter = -1
+    for row in eachNewestRow:
+        if eachNewestRow[row] == -1:
+            continue
+        if counter == -1:
+            counter = row
+            continue
+        if eachNewestRow[row][0] > eachNewestRow[counter][0]:
+            counter = row
+    if operation == "get":
+        return eachNewestRow[counter]
+    if operation == "type":
+        return counter
+    if operation == "del":
+        with open(databases[counter]) as csv_file:
+            csv_reader = csv.reader(csv_file, delimiter=",")
+            data = []
+            for row in csv_reader:
+                data.append(row)
+            del data[-1]
+        with open(databases[counter], "w+") as csv_file:
+            writer = csv.writer(csv_file)
+            writer.writerows(data)
+    return
+
 async def getPokemon(message):
     content = getMessageContent(message.content)
     dex = pokedex.Pokedex(version='v1', user_agent='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.116 Safari/537.36')
@@ -376,6 +442,14 @@ def getRedditLink(content):
                message = message + url + "\n" 
     return message
 
+async def deleteLastCommand(message):
+    row = newestRow('get')
+    botMessage = await message.channel.fetch_message(row[0])
+    userMessage = await message.channel.fetch_message(row[1])
+    await message.channel.delete_messages([botMessage, userMessage, message])
+    newestRow('del')
+    return
+
 async def handleMessage(message):
     prefix = getMessagePrefix(message.content)
     content = getMessageContent(message.content)
@@ -401,6 +475,8 @@ async def handleMessage(message):
         return await sunnySub(message)
     elif prefix == "%canyoufitabillionmothsin32hamptonroad'slivingroom":
         return "Yes"
+    elif message.content == "`":
+        return await deleteLastCommand(message)
     return getRedditLink(message.content)
     
 
