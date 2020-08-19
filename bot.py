@@ -57,6 +57,8 @@ def ytSearch(query, pageToken):
     )
     
     response = request.execute()
+    if len(response['items']) == 0:
+        return -1
     return response
 
 async def incrementYt(ytMessage, message, operation):
@@ -84,7 +86,10 @@ def giSearch(message, n):
                  "limit":n,
                  "offset":n-1,
                  "no_download":True}
-    response = response.download(arguments)
+    try:
+        response = response.download(arguments)
+    except SystemExit:
+        return -1
     return response[0][message][len(response[0][message]) - 1]
     
 async def incrementGi(giMessage, message, operation):
@@ -104,7 +109,10 @@ async def incrementGi(giMessage, message, operation):
     return
 
 def coSearch(message, n):
-    result = combio_api.search(message)[n][1]
+    result = combio_api.search(message)
+    if result == -1:
+        return -1
+    result = result[n][1]
     ts = combio_api.getDefaultTimestamps(result)
     return combio_api.getVideoUrl(result, ts)
     
@@ -124,6 +132,8 @@ async def incrementCo(coMessage, message, operation):
     
 def wikiSearch(message, n):
     search = wikipedia.search(message)
+    if len(search) == 0:
+        return -1
     if n >= len(search):
         n = n - (len(search) * int((float(n) / len(search))))
     nthSearch = search[n]
@@ -193,13 +203,16 @@ async def createSearchPost(message):
         db = WIKI_DATABASE
     elif prefix == "%yt":
         response = ytSearch(content, "")
-        url = "https://www.youtube.com/watch?v=" + response['items'][0]['id']['videoId']
-        n = ""
-        if 'prevPageToken' in response.keys():
-            n = n + response['prevPageToken']
-        n = n + ","
-        if 'nextPageToken' in response.keys():
-            n = n + response['nextPageToken']
+        if response == -1:
+            url = -1
+        else:
+            url = "https://www.youtube.com/watch?v=" + response['items'][0]['id']['videoId']
+            n = ""
+            if 'prevPageToken' in response.keys():
+                n = n + response['prevPageToken']
+            n = n + ","
+            if 'nextPageToken' in response.keys():
+                n = n + response['nextPageToken']
         db = YOUTUBE_DATABASE
     elif prefix == "%gi":
         n = 0
@@ -207,6 +220,8 @@ async def createSearchPost(message):
         db = GI_DATABASE
     else:
         return
+    if url == -1 or embedUrl == -1:
+        return "no results you fucking cuck"
     if embedUrl == "":
         createdMessage = await message.channel.send(url)
     else:
@@ -230,8 +245,8 @@ async def incrementSearch(row, message, n, prefix):
         await incrementYt(row, message, n)
     elif prefix == "%gi":
         await incrementGi(row, message, n)
-    else:
-        return
+    await addSelectionArrows(createdMessage)
+    return
     
 def selectDatabase(content):
     prefix = getMessagePrefix(content)
