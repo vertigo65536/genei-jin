@@ -12,11 +12,22 @@ import googleapiclient.errors
 import you
 import csv
 import combio_api
+import urllib.request as urllib2
 from pokedex import pokedex
 from google_images_download import google_images_download
 from bs4 import BeautifulSoup
 from dotenv import load_dotenv
 
+def checkValidImageUrl(url):
+    req = urllib2.Request(url)
+    try:
+        resp = urllib2.urlopen(req)
+    except urllib2.HTTPError as e:
+        return 0
+    except urllib2.URLError as e:
+        return 0
+    else:
+        return 1 
 
 async def addSelectionArrows(message):
     await message.add_reaction("⏪")
@@ -102,6 +113,15 @@ async def incrementGi(giMessage, message, operation):
     else:
         newCounter = 0
     newUrl = giSearch(giMessage[2], newCounter)
+    while checkValidImageUrl(newUrl) == 0:
+        if newCounter == 0:
+            return
+        if operation == "+":
+            newCounter = newCounter+1
+        elif operation == "-":
+            newCounter = newCounter-1
+        newUrl = giSearch(giMessage[2], newCounter)
+    print(">>>>" + newUrl + "<<<<")
     e = discord.Embed()
     e.set_image(url=newUrl)
     await message.edit(embed=e)
@@ -217,6 +237,11 @@ async def createSearchPost(message):
     elif prefix == "%gi":
         n = 0
         embedUrl = giSearch(content, n)
+        while checkValidImageUrl(embedUrl) == 0:
+            n = n+1
+            if n >= 26:
+                return "wack"
+            embedUrl = giSearch(content, n)
         db = GI_DATABASE
     else:
         return
