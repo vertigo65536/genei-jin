@@ -93,6 +93,7 @@ async def incrementYt(ytMessage, message, operation):
 def giSearch(message, n):
     response = google_images_download.googleimagesdownload()
     #content = getMessageContent(message.content)
+    message = message.encode('utf-8').decode('raw_unicode_escape', 'ignore')
     arguments = {"keywords": message,
                  "limit":n,
                  "offset":n-1,
