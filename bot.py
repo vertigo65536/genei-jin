@@ -516,6 +516,11 @@ async def handleMessage(message):
         return await sunnySub(message)
     elif prefix == "%canyoufitabillionmothsin32hamptonroad'slivingroom":
         return "Yes"
+    elif "69" in message.content:
+       await message.add_reaction("🇳")
+       await message.add_reaction("🇮")
+       await message.add_reaction("🇨")
+       await message.add_reaction("🇪")
     elif message.content == "`":
         return await deleteLastCommand(message)
     return getRedditLink(message.content)
