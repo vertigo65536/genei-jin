@@ -516,7 +516,7 @@ async def handleMessage(message):
         return await sunnySub(message)
     elif prefix == "%canyoufitabillionmothsin32hamptonroad'slivingroom":
         return "Yes"
-    elif "69" in message.content:
+    elif "69" in message.content.split(" "):
        await message.add_reaction("🇳")
        await message.add_reaction("🇮")
        await message.add_reaction("🇨")
@@ -580,7 +580,7 @@ async def on_message(message):
     if message.author == client.user:
         return
     response = await handleMessage(message)
-    if response != None:
+    if response != "":
         await message.channel.send(response)
     else:
         return
