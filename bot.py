@@ -12,7 +12,9 @@ import googleapiclient.errors
 import you
 import csv
 import combio_api
+import stats
 import urllib.request as urllib2
+import time
 from pokedex import pokedex
 from google_images_download import google_images_download
 from bs4 import BeautifulSoup
@@ -491,39 +493,81 @@ async def deleteLastCommand(message):
     newestRow('del')
     return
 
+def getStats(user, content):
+    userId = str(user.id)
+    rawStats = stats.getFileAsArray(stats.checkAndCreate(userId))
+    readableTime = time.ctime(float(str.rstrip(rawStats[0])))
+    if content == -1:
+        formattedStats = "Commands used since " + readableTime + " by " + user.name + "\n"
+        for i in range(1, len(rawStats)):
+            formattedStats = formattedStats+rawStats[i]
+        return formattedStats
+    else:
+        content = str.lower(content)
+        value = stats.getStatValue(rawStats, content)
+        if value == None:
+            value = stats.getStatValue(rawStats, "%" + content)
+        if value == None:
+            value = "No stat found for " + content
+        else:
+            value = content + " used " + str(value) + " times since " + readableTime + " by " + user.name
+        return value
+
 async def handleMessage(message):
     prefix = getMessagePrefix(message.content)
     content = getMessageContent(message.content)
+    output = ""
+    cmd = -1
     if prefix == "%ping":
-        return "pong"
+        cmd = prefix
+        output = "pong"
     elif prefix in ["%co", "%wiki", "%yt", "%gi"]:
-        return await createSearchPost(message)
+        cmd = prefix
+        output = await createSearchPost(message)
     elif isLoneEmoji(message):
-        return await bigmoji(message)
+        cmd = "Bigmoji"
+        output = await bigmoji(message)
     elif prefix == "%title":
-        return await setTitle(message)
+        cmd = prefix
+        output = await setTitle(message)
     elif prefix == "%ctitle":
-        return await setChannelTitle(message)
+        cmd = prefix
+        output = await setChannelTitle(message)
     elif prefix == "%topic":
-        return await setTopic(message)
+        cmd = prefix
+        output = await setTopic(message)
     elif prefix == "%man" or prefix == "%help":
-        return getManPage()
+        cmd = "%man"
+        output = getManPage()
     elif prefix == "%dex":
-        return await getPokemon(message)
+        cmd = prefix
+        output = await getPokemon(message)
     elif prefix == "%lucky":
-        return getLuckyG(content)
+        cmd = prefix
+        output = getLuckyG(content)
     elif message.content.lower().startswith("the gang "):
-        return await sunnySub(message)
+        cmd = "sunny"
+        output = await sunnySub(message)
     elif prefix == "%canyoufitabillionmothsin32hamptonroad'slivingroom":
-        return "Yes"
+        cmd = prefix
+        output = "Yes"
     elif "69" in message.content.split(" "):
+       cmd = 69
        await message.add_reaction("🇳")
        await message.add_reaction("🇮")
        await message.add_reaction("🇨")
        await message.add_reaction("🇪")
     elif message.content == "`":
-        return await deleteLastCommand(message)
-    return getRedditLink(message.content)
+        cmd = "delete"
+        output = await deleteLastCommand(message)
+    elif prefix == "%stats":
+        cmd = prefix
+    if cmd != -1:
+        stats.writeStat(str(message.author.id), cmd)
+    if prefix == "%stats":
+        output = getStats(message.author, content)
+    #output = getRedditLink(message.content)
+    return output
     
 
 async def handleEdit(reaction, operation, user):
