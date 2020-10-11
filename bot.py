@@ -525,7 +525,7 @@ async def handleMessage(message):
         cmd = prefix
         output = await createSearchPost(message)
     elif isLoneEmoji(message):
-        cmd = "Bigmoji"
+        cmd = "bigmoji"
         output = await bigmoji(message)
     elif prefix == "%title":
         cmd = prefix
