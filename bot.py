@@ -475,15 +475,16 @@ async def sunnySub(message):
         os.remove(subtitle)
     return
 
-def getRedditLink(content):
-    content = content.split(" ")
+async def getRedditLink(messageData):
+    content = messageData.content.split(" ")
     message = ""
     for i in range(len(content)):
         if content[i].startswith("/r/"):
            url = "https://old.reddit.com" + content[i]
            if requests.get(url, allow_redirects=True).url == url:
                message = message + url + "\n" 
-    return message
+    if message != "":
+        await messageData.channel.send(message)
 
 async def deleteLastCommand(message):
     row = newestRow('get')
@@ -566,7 +567,7 @@ async def handleMessage(message):
         stats.writeStat(str(message.author.id), cmd)
     if prefix == "%stats":
         output = getStats(message.author, content)
-    #output = getRedditLink(message.content)
+    await getRedditLink(message)
     return output
     
 
