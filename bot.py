@@ -496,7 +496,7 @@ async def deleteLastCommand(message):
 
 def getStats(user, content):
     userId = str(user.id)
-    rawStats = stats.getFileAsArray(stats.checkAndCreate(userId))
+    rawStats = stats.getFileAsArray(stats.checkAndCreateStats(userId))
     readableTime = time.ctime(float(str.rstrip(rawStats[0])))
     if content == -1:
         formattedStats = "Commands used since " + readableTime + " by " + user.name + "\n"
@@ -505,69 +505,161 @@ def getStats(user, content):
         return formattedStats
     else:
         content = str.lower(content)
-        value = stats.getStatValue(rawStats, content)
+        value = stats.getStatValue(userId, content)
         if value == None:
-            value = stats.getStatValue(rawStats, "%" + content)
+            value = stats.getStatValue(userId, "%" + content)
         if value == None:
             value = "No stat found for " + content
         else:
             value = content + " used " + str(value) + " times since " + readableTime + " by " + user.name
         return value
 
+async def trophyPost(trophyId, message, user):
+    user = str(await client.fetch_user(user))[:-5]
+    trophyData = stats.getTrophyList()[trophyId]
+    e = discord.Embed(title=user + " has earned the trophy: ***" + trophyData['name'] + "***", description=trophyData['description'])
+    e.set_thumbnail(url=stats.getTrophyIcon(trophyData['tier']))
+    await message.channel.send(embed=e)
+
+def getUserId(user):
+    userPath = os.path.join(os.path.dirname(os.path.abspath(__file__)), "users.json")
+    with open(userPath) as json_file:
+        data = json.load(json_file)
+        try:
+            return data[user]
+        except:
+            return -1
+
+ 
+async def trophyProcess(trophyId, message):
+    if message.author.bot == True:
+        return
+    trophyInfo = stats.getTrophyList()[trophyId]
+    trophyCheck = stats.getTrophyValue(message.author.id, trophyId)
+    n = stats.getStatValue(message.author.id, str(trophyInfo['stat']))
+    if trophyCheck == "False" and n >= trophyInfo['criteria']:
+        stats.editTrophy(message.author.id, trophyId)
+        await trophyPost(trophyId, message, message.author.id)
+    if stats.checkPlat(message.author.id) == 1:
+        await awardTrophy("plat", message.author.id, message)
+
+async def awardTrophy(trophyId, user, message):
+    if user == -1:
+        return "Invalid User"
+    stats.editTrophy(user, trophyId)
+    await trophyPost(trophyId, message, user)
+    if stats.checkPlat(user) == 1:
+        await awardTrophy("plat", user, message)
+
+
 async def handleMessage(message):
     prefix = getMessagePrefix(message.content)
     content = getMessageContent(message.content)
     output = ""
-    cmd = -1
+    trophy = -1
+    stat = -1
+    cmd = 0
+    recieveId = message.author.id
     if prefix == "%ping":
-        cmd = prefix
+        cmd = 1
+        stat = prefix
         output = "pong"
     elif prefix in ["%co", "%wiki", "%yt", "%gi"]:
-        cmd = prefix
+        cmd = 1
+        trophy = prefix
+        stat = prefix
         output = await createSearchPost(message)
     elif isLoneEmoji(message):
-        cmd = "bigmoji"
+        cmd = 1
+        trophy = "bigmoji"
+        stat = "bigmoji"
         output = await bigmoji(message)
     elif prefix == "%title":
-        cmd = prefix
+        cmd = 1
+        stat = prefix
         output = await setTitle(message)
     elif prefix == "%ctitle":
-        cmd = prefix
+        cmd = 1
+        stat = prefix
         output = await setChannelTitle(message)
     elif prefix == "%topic":
-        cmd = prefix
+        cmd = 1
+        stat = prefix
         output = await setTopic(message)
     elif prefix == "%man" or prefix == "%help":
-        cmd = "%man"
+        cmd = 1
+        stat = "%man"
         output = getManPage()
     elif prefix == "%dex":
-        cmd = prefix
+        cmd = 1
+        stat = prefix
         output = await getPokemon(message)
     elif prefix == "%lucky":
-        cmd = prefix
+        cmd = 1
+        stat = prefix
         output = getLuckyG(content)
     elif message.content.lower().startswith("the gang "):
-        cmd = "sunny"
+        cmd = 1
+        stat = "sunny"
         output = await sunnySub(message)
     elif prefix == "%canyoufitabillionmothsin32hamptonroad'slivingroom":
-        cmd = prefix
+        trophy = "hampton"
+        cmd = 1
+        stat = prefix
         output = "Yes"
     elif "69" in message.content.split(" "):
-       cmd = 69
+       trophy = "nice"
+       stat = "69"
        await message.add_reaction("🇳")
        await message.add_reaction("🇮")
        await message.add_reaction("🇨")
        await message.add_reaction("🇪")
     elif message.content == "`":
-        cmd = "delete"
+        cmd = 1
+        stat = "delete"
         output = await deleteLastCommand(message)
     elif prefix == "%stats":
-        cmd = prefix
-    if cmd != -1:
-        stats.writeStat(str(message.author.id), cmd)
+        cmd = 1
+        stat = prefix
+    elif any(word in str.lower(message.content) for word in ['shid', 'shidding', 'shidded', 'fard', 'farding', 'farded']):
+        stat = "shidandfard"
+        trophy = "shid"
+    elif prefix == "%bugreport":
+        if str(message.author.id) != os.getenv('ADMIN_ID'):
+            output = "not admin"
+        else:
+            recieveId = getUserId(content)
+            output = await awardTrophy("bug", recieveId, message) 
+    elif prefix == "%featurerequest":
+        if str(message.author.id) != os.getenv('ADMIN_ID'):
+            output = "not admin"
+        else:
+            recieveId = getUserId(content)
+            output = await awardTrophy("feature", recieveId, message)
+    elif prefix == "%trophylist" or prefix == "%tl":
+        output = stats.getReadableTrophyList()
+    elif prefix == "%mytrophys" or prefix == "%mt":
+        trophys = stats.getTrophyList()
+        for key in trophys:
+            if stats.getTrophyValue(message.author.id, key) == "True":
+                await trophyPost(key, message, message.author.id)
+    if stat != -1:
+        stats.checkAndCreateStats(message.author.id)
+        stats.checkAndCreateTrophy(message.author.id)
+        stats.writeStat(str(message.author.id), stat)
+    if cmd == 1:
+        stats.writeStat(str(message.author.id), "all")
+        await trophyProcess("first", message)
+        await trophyProcess("cmds", message)
+    if message.content[0] == "/":
+        await trophyProcess("cylon", message)
+    if trophy != -1:
+        await trophyProcess(trophy, message)
     if prefix == "%stats":
         output = getStats(message.author, content)
     await getRedditLink(message)
+    if stats.checkPlat(recieveId) == 1:
+        await awardTrophy("plat", recieveId, message)
     return output
     
 
@@ -625,7 +717,7 @@ async def on_message(message):
     if message.author == client.user:
         return
     response = await handleMessage(message)
-    if response != "":
+    if response != "" and response != None:
         await message.channel.send(response)
     else:
         return
@@ -650,5 +742,9 @@ async def on_message_edit(before, after):
     else:
         await editQuery(after)
     return
+
+@client.event
+async def on_message_delete(message):
+    await trophyProcess("delete", message)
 
 client.run(TOKEN)

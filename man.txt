@@ -20,6 +20,10 @@
 >  Returns the "i'm feeling lucky" result of a google search of a given query
 >  **%stats:**
 >  returns either all stats for user, or if given a param, stats for that search for user
+>  **%trophylist / %tl**
+>  Returns a list of all trophys
+>  **%mytrophys / %mt**
+>  Returns all your attained achivements
 >  **%man:**
 >  returns this man page
 >  **%help:**

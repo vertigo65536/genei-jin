@@ -1,0 +1,114 @@
+{
+    "delete": {
+        "name": "Fucking Cuck",
+        "description": "Have your comment be deleted by someone",
+        "tier": "Bronze",
+        "criteria": -1,
+        "stat": ""
+    },
+    "first": {
+        "name": "Ham Night is Spam Night",
+        "description": "Use a command for the first time (since achivements were introduced)",
+        "tier": "Bronze",
+        "criteria": -1,
+        "stat": ""
+    },
+    "shid": {
+        "name": "Shidding and Farding All Over The Place",
+        "description": "Shid and/or Fard 25 times",
+        "tier": "Silver",
+        "criteria": 25,
+        "stat": "shidandfard"
+    },
+    "%yt": {
+        "name": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+        "description": "Use the %yt command 50 times",
+        "tier": "Gold",
+        "criteria": 50,
+        "stat": "%yt"
+    },
+    "%co": {
+        "name": "Bart Will You Stop Whistling That Annoying Tune",
+        "description": "Use %co command 50 times",
+        "tier": "Gold",
+        "criteria": 50,
+        "stat": "%co"
+
+    },
+    "%wiki": {
+        "name": "Loremaster of Hilarious Chat",
+        "description": "Use %wiki command 50 times",
+        "tier": "Gold",
+        "criteria": 50,
+        "stat": "%wiki"
+
+    },
+    "nice": {
+        "name": "Nice",
+        "description": "Say 69 a nice number of times",
+        "tier": "Gold",
+        "criteria": 69,
+        "stat": "69"
+
+    },
+    "cylon": {
+        "name": "Cylon Sympathizer",
+        "description": "Use the *other* bot",
+        "tier": "Bronze",
+        "criteria": -1,
+        "stat": ""
+    },
+    "hampton": {
+        "name": "Didn't Get It The First Time",
+        "description": "use %canyoufitabillionmothsin32hamptonroad'slivingroom more than once",
+        "tier": "Silver",
+        "criteria": 2,
+        "stat": "%canyoufitabillionmothsin32hamptonroad'slivingroom"
+
+    },
+    "%gi": {
+        "name": "Worth 50,000 Words",
+        "description": "Use %gi 50 times",
+        "tier": "Gold",
+        "criteria": 50,
+        "stat": "%gi"
+
+    },
+    "bug": {
+        "name": "Say Bug",
+        "description": "Report a bug that actually gets fixed",
+        "tier": "Silver",
+        "criteria": -1,
+        "stat": ""
+    },
+    "feature": {
+        "name": "Featured Extra",
+        "description": "Request a feature that actually gets implemented",
+        "tier": "Silver",
+        "criteria": -1,
+        "stat": ""
+    },
+    "bigmoji": {
+        "name": "I Can't See Without My Glasses!",
+        "description": "Use 50 bigmoji",
+        "tier": "Gold",
+        "criteria": 50,
+        "stat": "bigmoji"
+
+    },
+    "cmds": {
+        "name": "The Bot Of The Joke",
+        "description": "Use 100 bot commands",
+        "tier": "Gold",
+        "criteria": 100,
+        "stat": "all"
+
+    },
+    "plat": {
+        "name": "The Platinum Shine, it Burns Like the Lava in Metroid",
+        "description": "Get all trophys",
+        "tier": "Platinum",
+        "criteria": -1,
+        "stat": ""
+    }
+}
