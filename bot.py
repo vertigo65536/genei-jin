@@ -15,6 +15,8 @@ import combio_api
 import stats
 import urllib.request as urllib2
 import time
+import aiohttp
+import urllib
 from pokedex import pokedex
 from google_images_download import google_images_download
 from bs4 import BeautifulSoup
@@ -52,45 +54,35 @@ def getMessageContent(message):
     return content
 
 
-def ytSearch(query, pageToken):
-    api_service_name = "youtube"
-    api_version = "v3"    
-    
-    developerKey = os.getenv("YOUTUBE_API_KEY")
-    youtube = googleapiclient.discovery.build(
-        api_service_name, api_version, developerKey=developerKey)
-
-    request = youtube.search().list(
-        part="snippet",
-        maxResults=1,
-        order="relevance",
-        pageToken=pageToken,
-        q=query,
-        type="video"
-    )
-    
-    response = request.execute()
-    if len(response['items']) == 0:
-        return -1
-    return response
+async def ytSearch(query, n):
+    async with aiohttp.ClientSession() as session:
+        async with session.get('http://www.youtube.com/results', params = {'q': query}) as r:
+            if r.status != 200:
+                raise RuntimeError(f'{r.status} - {r.reason}')
+            source = await r.text()
+            results = re.findall(r'"\/watch\?v=(.{11})', source)
+            print(n)
+            if len(results) <= 0:
+                return -1
+            if len(results) < n:
+                return -2
+            queryString = urllib.parse.urlencode({'v': results[n]})
+            return f'http://www.youtube.com/watch?{queryString}'
 
 async def incrementYt(ytMessage, message, operation):
     if operation == "+":
-        pageToken = ytMessage[4]
-    elif operation == "-":
-        pageToken = ytMessage[3]
+        newCounter = int(ytMessage[3])+1
+    elif operation =="-":
+        newCounter = int(ytMessage[3])-1
+        if newCounter < 0:
+            newCounter = 0
     else:
-        pageToken = ""
-    response = ytSearch(ytMessage[2], pageToken)
-    await message.edit(content="https://www.youtube.com/watch?v=" + response['items'][0]['id']['videoId'])
-    prevPageToken = ""
-    nextPageToken = ""
-    if 'prevPageToken' in response.keys():
-        prevPageToken = response['prevPageToken']
-    if 'nextPageToken' in response.keys():
-        nextPageToken = response['nextPageToken']
-    updateCounter(message.id, YOUTUBE_DATABASE, [prevPageToken, nextPageToken])
+        newCounter = 0
+    newUrl = await ytSearch(ytMessage[2], newCounter)
+    await message.edit(content=newUrl)
+    updateCounter(message.id, YOUTUBE_DATABASE, newCounter)
     return
+
     
 def giSearch(message, n):
     response = google_images_download.googleimagesdownload()
@@ -225,17 +217,7 @@ async def createSearchPost(message):
         url = wikiSearch(content, n)
         db = WIKI_DATABASE
     elif prefix == "%yt":
-        response = ytSearch(content, "")
-        if response == -1:
-            url = -1
-        else:
-            url = "https://www.youtube.com/watch?v=" + response['items'][0]['id']['videoId']
-            n = ""
-            if 'prevPageToken' in response.keys():
-                n = n + response['prevPageToken']
-            n = n + ","
-            if 'nextPageToken' in response.keys():
-                n = n + response['nextPageToken']
+        url = await ytSearch(content, n)
         db = YOUTUBE_DATABASE
     elif prefix == "%gi":
         n = 0
