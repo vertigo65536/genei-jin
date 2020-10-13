@@ -61,7 +61,6 @@ async def ytSearch(query, n):
                 raise RuntimeError(f'{r.status} - {r.reason}')
             source = await r.text()
             results = re.findall(r'"\/watch\?v=(.{11})', source)
-            print(n)
             if len(results) <= 0:
                 return -1
             if len(results) < n:
