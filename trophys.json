@@ -8,7 +8,7 @@
     },
     "first": {
         "name": "Ham Night is Spam Night",
-        "description": "Use a command for the first time (since achivements were introduced)",
+        "description": "Use a command for the first time (since trophies were introduced)",
         "tier": "Bronze",
         "criteria": -1,
         "stat": ""
@@ -106,7 +106,7 @@
     },
     "plat": {
         "name": "The Platinum Shine, it Burns Like the Lava in Metroid",
-        "description": "Get all trophys",
+        "description": "Get all trophies",
         "tier": "Platinum",
         "criteria": -1,
         "stat": ""
