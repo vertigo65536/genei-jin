@@ -24,6 +24,8 @@
 >  Returns a list of all trophys
 >  **%mytrophys / %mt**
 >  Returns all your attained achivements
+>  **%trophystat / %ts**
+>  Returns all trophies ordered by attained rate
 >  **%man:**
 >  returns this man page
 >  **%help:**
