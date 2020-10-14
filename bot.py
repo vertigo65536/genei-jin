@@ -624,6 +624,16 @@ async def handleMessage(message):
         for key in trophys:
             if stats.getTrophyValue(message.author.id, key) == "True":
                 await trophyPost(key, message, message.author.id)
+    elif prefix == "%trophystat" or prefix == "%ts":
+        trophys = stats.getTrophyList()
+        trophyDict = {}
+        for key in trophys:
+            trophyDict[key] = stats.getTrophyStat(key)
+        {k: v for k, v in sorted(trophyDict.items(), key=lambda item: item[1])}
+        string = ""
+        for key in trophys:
+            string = string + trophys[key]['name'] + ": " + str(trophyDict[key]) + "%\n"
+        return string
     if stat != -1:
         stats.checkAndCreateStats(message.author.id)
         stats.checkAndCreateTrophy(message.author.id)

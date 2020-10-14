@@ -21,7 +21,7 @@
         "stat": "shidandfard"
     },
     "%yt": {
-        "name": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+        "name": "/watch?v=dQw4w9WgXcQ",
         "description": "Use the %yt command 50 times",
         "tier": "Gold",
         "criteria": 50,

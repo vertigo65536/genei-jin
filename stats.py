@@ -21,6 +21,28 @@ def checkAndCreateTrophy(filename):
         string = string + trophy + ",False\n"
     return checkAndCreate(str(filename) + "-trophy", string)
 
+def getTrophyStat(trophyId):
+    cacheFile = "stats/" + trophyId + ".txt"
+    if os.path.isfile(cacheFile) == True:
+        with open(cacheFile, "r") as f:
+            return str.rstrip(f.read())
+    paths = os.listdir('stats/')
+    total = 0
+    success = 0
+    for path in paths:
+        if path.endswith('-trophy.csv') != False:
+            total = total + 1
+            if getTrophyValue(path[:-11], trophyId) == "True":
+                success = success + 1
+    if success != 0:
+        value = round((success/total)*100)
+    else:
+        value = 0
+    with open(cacheFile, "w") as f:
+        f.write(str(value))
+    
+    return value
+
 def getTrophyList():
     trophyPath = os.path.join(os.path.dirname(os.path.abspath(__file__)), "trophys.json")
     with open(trophyPath) as json_file:
@@ -62,6 +84,10 @@ def editTrophy(userId, trophyId):
     with open(filePath, "w") as f:
         for line in fileArray:
             f.write(line)
+    try:
+        os.remove("stats/" + trophyId + ".txt")
+    except:
+        return
 
 def editStat(userId, statId):
     filePath = checkAndCreateStats(userId)
@@ -139,12 +165,11 @@ def getTrophyIcon(tier):
     return dictionary[tier]
 
 def testing():
-    path = checkAndCreateTrophy("poop")
-    array = getFileAsArray(path)
-    print(getStatRow(array, "first"))
-    editTrophy(path, array, getStatRow(array, "first"))
-    
-
+   editTrophy("this", "delete")
+   print(str(getTrophyStat('delete')) + "%")
+   editTrophy("that", "delete")
+   print(str(getTrophyStat('delete')) + "%")
+ 
 statsPath = os.path.join(os.path.dirname(os.path.abspath(__file__)),"stats")
 if not os.path.exists(statsPath):
     os.mkdir(statsPath)
