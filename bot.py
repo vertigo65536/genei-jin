@@ -1,22 +1,15 @@
-import os
-import re
-import requests
-import discord
-import json
-import random
-import google_auth_oauthlib.flow
-import googleapiclient.discovery
-import googleapiclient.errors
-import you
-import csv
-import urllib.request as urllib2
-import time
-import urllib
+import os, re, requests, discord, json, time, urllib, csv
 import search, tools, stats
 from pokedex import pokedex
-#from google_images_download import google_images_download
 from bs4 import BeautifulSoup
 from dotenv import load_dotenv
+from youtube import getDatabase as ytdb
+from wiki import getDatabase as wikidb
+from combio import getDatabase as codb
+from gi import getDatabase as gidb
+
+
+# Checks if a message only contains a single emoji, and no attachment
 
 def isLoneEmoji(message):
     pattern = re.compile('<:\w*:\d*>$')
@@ -25,38 +18,46 @@ def isLoneEmoji(message):
     else:
         return 0
 
-def getUserColour(message):
-    bestColour = "#000000"
-    bestRank = 0
-    for role in message.author.roles:
-        if role.position > bestRank and str(role.colour) != "#000000":
-            bestColour = role.colour
-    return bestColour
+
+# Posts a larger version of an emoji, and deletes the original message.
+# Sets colour as original user's colour
 
 async def bigmoji(message):
     id = message.content[1:-1].split(':')[2]
     imageUrl = "https://cdn.discordapp.com/emojis/" + id
-    e = discord.Embed(colour=getUserColour(message))
+    e = discord.Embed(colour=tools.getUserColour(message))
     e.set_image(url=imageUrl)
     await message.channel.send("", embed=e)
     await message.delete()
     return
+
+
+# Set guild title
 
 async def setTitle(message):
     newTitle = name=tools.getMessageContent(message.content)
     await message.guild.edit(name=newTitle)
     return
     
+
+# Set channel title
+
 async def setChannelTitle(message):
     newTitle = tools.getMessageContent(message.content)
     await message.channel.edit(name=str(newTitle))
     return
     
+
+# Set channel topic
+
 async def setTopic(message):
     newTopic = tools.getMessageContent(message.content)
     await message.channel.edit(topic=str(newTopic))
     return
     
+
+# Returns man page as string
+
 def getManPage():
     f = open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "man.txt"), "r")
     if f.mode == "r":
@@ -65,34 +66,17 @@ def getManPage():
     return
 
 
-def getNewestRow():
-    databases = [YOUTUBE_DATABASE, CO_DATABASE, WIKI_DATABASE, GI_DATABASE]
-    eachNewestRow = [[],[],[],[]]
-    for i in range(len(databases)):
-        with open(databases[i]) as csv_file:
-            csv_reader = csv.reader(csv_file, delimiter=',')
-            data = []
-            for row in csv_reader:
-                data.append(row)
-            if len(data) > 0:
-                eachNewestRow[i] = data[-1]
-    counter = -1
-    for i in range(len(eachNewestRow)):
-        if eachNewestRow[i] == []:
-            continue
-        if eachNewestRow[counter] == []:
-            counter = i
-            continue
-        if eachNewestRow[i][0] > eachNewestRow[counter][0]:
-            counter = i
-    return eachNewestRow[counter]
+# Determines newest row in any seach database, takes 1 param
+# If param is del, it deletes newest row
+# if param is get, it returns newest row
+# if param is type, returns which database it's in
 
 def newestRow(operation):
     databases = {
-    "yt": YOUTUBE_DATABASE,
-    "co": CO_DATABASE,
-    "wiki": WIKI_DATABASE,
-    "gi":  GI_DATABASE
+    "yt": ytdb(),
+    "co": codb(),
+    "wiki": wikidb(),
+    "gi":  gidb()
     }
     eachNewestRow = {}
     for database in databases:
@@ -130,6 +114,9 @@ def newestRow(operation):
             writer.writerows(data)
     return
 
+
+# Searches pokedex for pokemon and returns pokedex entry
+
 async def getPokemon(message):
     content = tools.getMessageContent(message.content)
     dex = pokedex.Pokedex(version='v1', user_agent='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.116 Safari/537.36')
@@ -156,13 +143,23 @@ async def getPokemon(message):
     await message.channel.send(embed=e)
     return
 
+
+# Returns imfeelinglucky search result for DuckDuckGo
+
 def getLuckyD(content):
     var = requests.get(r'https://duckduckgo.com/?q=!' + urllib.parse.quote(content) + "%3Asiteurl", allow_redirects=True)
     return var.url
     
+
+# Returns imfeelinglucky search result for Google
+
 def getLuckyG(content):
     var = requests.get(r'https://www.google.com/search?btnI=1&q=' + urllib.parse.quote(content), headers = {"Referer": "http://www.google.com/"}, allow_redirects=True)
     return var.url.replace("https://www.google.com/url?q=", "")
+
+
+# Converts a string to an "It's Always Sunny in Philadelphia" style title
+# sequence
 
 async def sunnySub(message):
     soundFile = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'media', 'sunny.mp3')
@@ -185,6 +182,9 @@ async def sunnySub(message):
         os.remove(subtitle)
     return
 
+
+# Returns an array of links to all subreddits in a string
+
 async def getRedditLink(messageData):
     content = messageData.content.split(" ")
     message = ""
@@ -196,6 +196,9 @@ async def getRedditLink(messageData):
     if message != "":
         await messageData.channel.send(message)
 
+
+# Deletes last bot command in channel given message was sent in
+
 async def deleteLastCommand(message):
     row = newestRow('get')
     botMessage = await message.channel.fetch_message(row[0])
@@ -203,6 +206,8 @@ async def deleteLastCommand(message):
     await message.channel.delete_messages([botMessage, userMessage, message])
     newestRow('del')
     return
+
+# returns formatted user bot usage stats. content is empty returns all, else returns stats of given command
 
 def getStats(user, content):
     userId = str(user.id)
@@ -224,6 +229,9 @@ def getStats(user, content):
             value = content + " used " + str(value) + " times since " + readableTime + " by " + user.name
         return value
 
+
+# Posts a trophy
+
 async def trophyPost(trophyId, message, user):
     user = str(await client.fetch_user(user))[:-5]
     trophyData = stats.getTrophyList()[trophyId]
@@ -231,15 +239,8 @@ async def trophyPost(trophyId, message, user):
     e.set_thumbnail(url=stats.getTrophyIcon(trophyData['tier']))
     await message.channel.send(embed=e)
 
-def getUserId(user):
-    userPath = os.path.join(os.path.dirname(os.path.abspath(__file__)), "users.json")
-    with open(userPath) as json_file:
-        data = json.load(json_file)
-        try:
-            return data[user]
-        except:
-            return -1
 
+# Check if a user has earned a trophy, and if so, awards it
  
 async def trophyProcess(trophyId, message):
     if message.author.bot == True:
@@ -253,6 +254,9 @@ async def trophyProcess(trophyId, message):
     if stats.checkPlat(message.author.id) == 1:
         await awardTrophy("plat", message.author.id, message)
 
+
+# Manually awards a user a trophy
+
 async def awardTrophy(trophyId, user, message):
     if user == -1:
         return "Invalid User"
@@ -261,6 +265,9 @@ async def awardTrophy(trophyId, user, message):
     if stats.checkPlat(user) == 1:
         await awardTrophy("plat", user, message)
 
+
+# Takes a recieved message and checks if it is a bot function.
+# Executes it if so
 
 async def handleMessage(message):
     prefix = tools.getMessagePrefix(message.content)
@@ -338,13 +345,13 @@ async def handleMessage(message):
         if str(message.author.id) != os.getenv('ADMIN_ID'):
             output = "not admin"
         else:
-            recieveId = getUserId(content)
+            recieveId = tools.getUserId(content)
             output = await awardTrophy("bug", recieveId, message) 
     elif prefix == "%featurerequest":
         if str(message.author.id) != os.getenv('ADMIN_ID'):
             output = "not admin"
         else:
-            recieveId = getUserId(content)
+            recieveId = tools.getUserId(content)
             output = await awardTrophy("feature", recieveId, message)
     elif prefix == "%trophylist" or prefix == "%tl":
         output = stats.getReadableTrophyList()
@@ -383,24 +390,19 @@ async def handleMessage(message):
     return output
     
 
+# Initialises databases
+
 def initDatabases():
-    open(YOUTUBE_DATABASE, 'w').close()
-    open(WIKI_DATABASE, 'w').close()
-    open(GI_DATABASE, 'w').close()
-    open(CO_DATABASE, 'w').close()
+    open(ytdb(), 'w').close()
+    open(wikidb(), 'w').close()
+    open(gidb(), 'w').close()
+    open(codb(), 'w').close()
     return
     
 
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
-
 client = discord.Client()
-
-YOUTUBE_DATABASE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "youtube.csv")
-WIKI_DATABASE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "wiki.csv")
-GI_DATABASE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "gi.csv")
-CO_DATABASE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "co.csv")
-
 initDatabases()
 
 @client.event

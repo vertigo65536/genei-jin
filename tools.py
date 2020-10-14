@@ -63,3 +63,25 @@ def updateCounter(id, databasePath, newN):
         writer = csv.writer(csv_file)
         writer.writerows(list(rows))
     return
+
+# Determines a user's colour and returns it
+
+def getUserColour(message):
+    bestColour = "#000000"
+    bestRank = 0 
+    for role in message.author.roles:
+        if role.position > bestRank and str(role.colour) != "#000000":
+            bestColour = role.colour
+    return bestColour
+
+
+# Returns the user ID for nickname
+
+def getUserId(user):
+    userPath = os.path.join(os.path.dirname(os.path.abspath(__file__)), "users.json")
+    with open(userPath) as json_file:
+        data = json.load(json_file)
+        try:
+            return data[user]
+        except:
+            return -1
