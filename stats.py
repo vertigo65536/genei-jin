@@ -22,11 +22,11 @@ def checkAndCreateTrophy(filename):
     return checkAndCreate(str(filename) + "-trophy", string)
 
 def getTrophyStat(trophyId):
-    cacheFile = "stats/" + trophyId + ".txt"
+    cacheFile = os.path.join(statsPath, trophyId + ".txt")
     if os.path.isfile(cacheFile) == True:
         with open(cacheFile, "r") as f:
             return str.rstrip(f.read())
-    paths = os.listdir('stats/')
+    paths = os.listdir(statsPath)
     total = 0
     success = 0
     for path in paths:
@@ -85,7 +85,7 @@ def editTrophy(userId, trophyId):
         for line in fileArray:
             f.write(line)
     try:
-        os.remove("stats/" + trophyId + ".txt")
+        os.remove(os.path.join(statsPath, trophyId + ".txt"))
     except:
         return
 
