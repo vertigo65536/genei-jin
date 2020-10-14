@@ -628,8 +628,8 @@ async def handleMessage(message):
         trophys = stats.getTrophyList()
         trophyArray = []
         for key in trophys:
-            trophyArray.append([key, stats.getTrophyStat(key)])
-        trophyArray = sorted(trophyArray,key=lambda x: x[1])
+            trophyArray.append([key, int(stats.getTrophyStat(key))])
+        trophyArray = sorted(trophyArray, key=lambda x: x[1], reverse=True)
         string = ""
         for i in range(len(trophyArray)):
             string = string + trophyArray[i][0] + ": " + str(trophyArray[i][1]) + "%\n"
