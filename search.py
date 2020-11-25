@@ -27,14 +27,8 @@ async def createSearchPost(message):
     url = ""
     embedUrl = ""
     n = 0
-    if prefix == "%co":
-        url = combio.search(content, n)
-    elif prefix == "%co+":
-        url = combio.search(content, n, 1)
-    elif prefix == "%co-":
-        url = combio.search(content, n, 2)
-    elif prefix == "%co=":
-        url = combio.search(content, n, 3)
+    if prefix in ["%co", "%co+", "%co-", "%co="]:
+        url = combio.search(content, n, getCoGenType(prefix))
     elif prefix == "%wiki":
         url = wiki.search(content, n)
     elif prefix == "%yt":
