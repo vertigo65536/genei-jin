@@ -212,6 +212,8 @@ async def trophyPost(trophyId, message, user):
 async def trophyProcess(trophyId, message):
     if message.author.bot == True:
         return
+    if "%co" in trophyId:
+        trophyId = "%co"
     trophyInfo = stats.getTrophyList()[trophyId]
     trophyCheck = stats.getTrophyValue(message.author.id, trophyId)
     n = stats.getStatValue(message.author.id, str(trophyInfo['stat']))
@@ -248,7 +250,7 @@ async def handleMessage(message):
         cmd = 1
         stat = prefix
         output = "pong"
-    elif prefix in ["%co", "%wiki", "%yt", "%gi"]:
+    elif prefix in ["%co", "%co+", "%co-", "%co=", "%wiki", "%yt", "%gi"]:
         cmd = 1
         trophy = prefix
         stat = prefix

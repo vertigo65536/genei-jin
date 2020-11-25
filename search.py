@@ -29,6 +29,12 @@ async def createSearchPost(message):
     n = 0
     if prefix == "%co":
         url = combio.search(content, n)
+    elif prefix == "%co+":
+        url = combio.search(content, n, 1)
+    elif prefix == "%co-":
+        url = combio.search(content, n, 2)
+    elif prefix == "%co=":
+        url = combio.search(content, n, 3)
     elif prefix == "%wiki":
         url = wiki.search(content, n)
     elif prefix == "%yt":
@@ -61,8 +67,8 @@ async def createSearchPost(message):
 # Updates a search post to a new result number
 
 async def incrementSearch(row, message, n, prefix):
-    if prefix == "%co":
-        await combio.increment(row, message, n, getDatabase())
+    if prefix in ["%co", "%co+", "%co-", "%co="]:
+        await combio.increment(row, message, n, getDatabase(), getCoGenType(prefix))
     elif prefix == "%wiki":
         await wiki.increment(row, message, n, getDatabase())
     elif prefix == "%yt":
@@ -96,8 +102,8 @@ async def handleIncrement(reaction, operation, user):
         await youtube.increment(queryMessage, message, operation, getDatabase())
     if queryMessage[4] == "%gi":
         await gi.increment(queryMessage, message, operation, getDatabase())
-    if queryMessage[4] == "%co":
-        await combio.increment(queryMessage, message, operation, getDatabase())
+    if queryMessage[4] in ["%co", "%co+", "%co-", "%co="]:
+        await combio.increment(queryMessage, message, operation, getDatabase(), getCoGenType(queryMessage[4]))
     await reaction.remove(user)
     return
 
@@ -108,6 +114,15 @@ async def addSelectionArrows(message):
     await message.add_reaction("⏪")
     await message.add_reaction("⏩")
 
+def getCoGenType(prefix):
+    genType = 0
+    if prefix == "%co+":
+        genType = 1
+    if prefix == "%co-":
+        genType = 2
+    if prefix == "%co=":
+        genType = 3
+    return genType
 
 #return search database
 def getDatabase():
