@@ -2,6 +2,12 @@
 >  returns "pong" and confirms bot is active and replying to messages
 >  **%co:**
 >  returns simpsons/futurama/family guy/rick and morty clip correspondng to quote
+>  **%co+:**
+>  same as co, but forces the clip to be 20s, starting with quote
+>  **%co-:**
+>  ends with quote
+>  **%co=:**
+>  quote is centered
 >  **%wiki:**
 >  searches wikipedia and retrieves the first page corresponding to the query
 >  **%yt:**

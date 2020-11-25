@@ -13,11 +13,11 @@ def search(message, n, method = 0):
         ts = combio_api.getDefaultTimestamps(result)
     elif method == 1:
         timestamps = combio_api.getAllTimestamps(result)
-        endstamp = timestamps[len(timestamps) - 1]['ts2']
+        endstamp = timestamps[len(timestamps) - 2]['ts2']
         for i in range(len(timestamps)):
-            startstamp = timestamps[len(timestamps) - i -1]['ts1']
+            startstamp = timestamps[len(timestamps) - i -2]['ts1']
             if (int(endstamp) - int(startstamp) > 20000):
-                startstamp = timestamps[len(timestamps) - i]['ts1']
+                startstamp = timestamps[len(timestamps) - i - 1]['ts1']
                 break;
         ts = {'ts1': startstamp,
               'ts2': endstamp}
