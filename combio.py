@@ -15,7 +15,7 @@ def search(message, n):
 # Edits an existing search result message, taking the query message, 
 # search result message and operation as params
 
-async def increment(coMessage, message, operation):
+async def increment(coMessage, message, operation, db):
     if operation == "+":
         newCounter = int(coMessage[3])+1
     elif operation =="-":
@@ -26,10 +26,5 @@ async def increment(coMessage, message, operation):
         newCounter = 0
     newUrl = search(coMessage[2], newCounter)
     await message.edit(content=newUrl)
-    updateCounter(message.id, getDatabase(), newCounter)
+    updateCounter(message.id, db, newCounter)
     return
-
-# Returns the database url of combio result messages
-
-def getDatabase():
-    return os.path.join(os.path.dirname(os.path.abspath(__file__)), "co.csv")

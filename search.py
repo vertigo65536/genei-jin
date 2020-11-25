@@ -1,4 +1,4 @@
-import csv, discord
+import csv, discord, os
 import tools, youtube, combio, wiki, gi
 
 
@@ -29,13 +29,10 @@ async def createSearchPost(message):
     n = 0
     if prefix == "%co":
         url = combio.search(content, n)
-        db = combio.getDatabase()
     elif prefix == "%wiki":
         url = wiki.search(content, n)
-        db = wiki.getDatabase()
     elif prefix == "%yt":
         url = await youtube.search(content, n)
-        db = youtube.getDatabase()
     elif prefix == "%gi":
         n = 0
         embedUrl = gi.search(content, n)
@@ -44,7 +41,6 @@ async def createSearchPost(message):
             if n >= 26:
                 return "wack"
             embedUrl = gi.search(content, n)
-        db = gi.getDatabase()
     else:
         return
     if url == -1 or embedUrl == -1:
@@ -55,8 +51,8 @@ async def createSearchPost(message):
         e = discord.Embed()
         e.set_image(url=embedUrl)
         createdMessage = await message.channel.send(url, embed=e)
-    f = open(db, 'a')
-    f.write(str(createdMessage.id) + "," + str(message.id) + "," + str(content) + "," + str(n) + "\n")
+    f = open(getDatabase(), 'a')
+    f.write(str(createdMessage.id) + "," + str(message.id) + "," + str(content) + "," + str(n) + "," + prefix + "\n")
     f.close()
     await addSelectionArrows(createdMessage)
     return
@@ -66,13 +62,13 @@ async def createSearchPost(message):
 
 async def incrementSearch(row, message, n, prefix):
     if prefix == "%co":
-        await combio.increment(row, message, n)
+        await combio.increment(row, message, n, getDatabase())
     elif prefix == "%wiki":
-        await wiki.increment(row, message, n)
+        await wiki.increment(row, message, n, getDatabase())
     elif prefix == "%yt":
-        await youtube.increment(row, message, n)
+        await youtube.increment(row, message, n, getDatabase())
     elif prefix == "%gi":
-        await gi.increment(row, message, n)
+        await gi.increment(row, message, n, getDatabase())
     await addSelectionArrows(message)
     return
 
@@ -80,7 +76,7 @@ async def incrementSearch(row, message, n, prefix):
 # parses a general query edit
 
 async def editQuery(message):
-    db = selectDatabase(message.content)
+    db = getDatabase()
     row = tools.getStoredRowByQueryID(message.id, db)
     updateQuery(message.id, db, tools.getMessageContent(message.content))
     row = tools.getStoredRowByQueryID(message.id, db)
@@ -91,18 +87,17 @@ async def editQuery(message):
 
 async def handleIncrement(reaction, operation, user):
     message = reaction.message
-    wikiMessage = tools.getStoredRowByID(message.id, wiki.getDatabase())
-    ytMessage = tools.getStoredRowByID(message.id, youtube.getDatabase())
-    giMessage = tools.getStoredRowByID(message.id, gi.getDatabase())
-    coMessage = tools.getStoredRowByID(message.id, combio.getDatabase())
-    if wikiMessage != -1:
-        await wiki.increment(wikiMessage, message, operation)
-    if ytMessage != -1:
-        await youtube.increment(ytMessage, message, operation)
-    if giMessage != -1:
-        await gi.increment(giMessage, message, operation)
-    if coMessage != -1:
-        await combio.increment(coMessage, message, operation)
+    queryMessage = tools.getStoredRowByID(message.id, getDatabase())
+    if queryMessage == -1:
+        return -1
+    if queryMessage[4] == "%wiki":
+        await wiki.increment(queryMessage, message, operation, getDatabase())
+    if queryMessage[4] == "%yt":
+        await youtube.increment(queryMessage, message, operation, getDatabase())
+    if queryMessage[4] == "%gi":
+        await gi.increment(queryMessage, message, operation, getDatabase())
+    if queryMessage[4] == "%co":
+        await combio.increment(queryMessage, message, operation, getDatabase())
     await reaction.remove(user)
     return
 
@@ -114,19 +109,6 @@ async def addSelectionArrows(message):
     await message.add_reaction("⏩")
 
 
-# Takes message string and returns the correct database for the comimand
-# used, returns -1 if no valid database
-
-def selectDatabase(content):
-    prefix = tools.getMessagePrefix(content)
-    if prefix == "%co":
-        db = combio.getDatabase()
-    elif prefix == "%wiki":
-        db = wiki.getDatabase()
-    elif prefix == "%yt":
-        db = youtube.getDatabase()
-    elif prefix == "%gi":
-        db = gi.getDatabase()
-    else:
-        return -1
-    return db
+#return search database
+def getDatabase():
+    return os.path.join(os.path.dirname(os.path.abspath(__file__)), "cmds.csv")

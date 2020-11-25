@@ -22,7 +22,7 @@ async def search(query, n):
 # takes the original message, the query message and the operation as 
 # param
 
-async def increment(ytMessage, message, operation):
+async def increment(ytMessage, message, operation, db):
     if operation == "+":
         newCounter = int(ytMessage[3])+1
     elif operation =="-":
@@ -33,10 +33,5 @@ async def increment(ytMessage, message, operation):
         newCounter = 0 
     newUrl = await search(ytMessage[2], newCounter)
     await message.edit(content=newUrl)
-    updateCounter(message.id, getDatabase(), newCounter)
+    updateCounter(message.id, db, newCounter)
     return
-
-# Returns the path for the youtube message database
-
-def getDatabase():
-    return os.path.join(os.path.dirname(os.path.abspath(__file__)), "youtube.csv")

@@ -24,7 +24,7 @@ def search(message, n):
 # Updates a search to a new result number, taking the original search
 # message, the query message, and the operation as parameters
 
-async def increment(giMessage, message, operation):
+async def increment(giMessage, message, operation, db):
     if operation == "+":
         newCounter = int(giMessage[3])+1
     elif operation == "-":
@@ -45,7 +45,7 @@ async def increment(giMessage, message, operation):
     e = discord.Embed()
     e.set_image(url=newUrl)
     await message.edit(embed=e)
-    updateCounter(message.id, getDatabase(), newCounter)
+    updateCounter(message.id, db, newCounter)
     return
 
 # Checks if a url returned above returns an error
@@ -60,8 +60,3 @@ def checkValidImageUrl(url):
         return 0
     else:
         return 1
-
-# returns the database path for google image search messages
-
-def getDatabase():
-    return os.path.join(os.path.dirname(os.path.abspath(__file__)), "gi.csv")

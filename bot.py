@@ -1,12 +1,8 @@
-import os, re, requests, discord, json, time, urllib, csv
+import os, re, requests, discord, json, time, urllib, csv, subprocess
 import search, tools, stats
 from pokedex import pokedex
 from bs4 import BeautifulSoup
 from dotenv import load_dotenv
-from youtube import getDatabase as ytdb
-from wiki import getDatabase as wikidb
-from combio import getDatabase as codb
-from gi import getDatabase as gidb
 
 
 # Checks if a message only contains a single emoji, and no attachment
@@ -66,53 +62,24 @@ def getManPage():
     return
 
 
-# Determines newest row in any seach database, takes 1 param
-# If param is del, it deletes newest row
-# if param is get, it returns newest row
-# if param is type, returns which database it's in
+#Returns the newest row in the search query DB
+def getNewestRow():
+    line = subprocess.check_output(['tail', '-1', search.getDatabase()])[0:-1].decode()
+    return line.split(',')
 
-def newestRow(operation):
-    databases = {
-    "yt": ytdb(),
-    "co": codb(),
-    "wiki": wikidb(),
-    "gi":  gidb()
-    }
-    eachNewestRow = {}
-    for database in databases:
-        with open(databases[database]) as csv_file:
-            csv_reader = csv.reader(csv_file, delimiter=',')
-            data = []
-            for row in csv_reader:
-                data.append(row)
-            if len(data) > 0:
-                eachNewestRow[database] = data[-1]
-            else:
-                eachNewestRow[database] = -1
-    counter = -1
-    for row in eachNewestRow:
-        if eachNewestRow[row] == -1:
-            continue
-        if counter == -1:
-            counter = row
-            continue
-        if eachNewestRow[row][0] > eachNewestRow[counter][0]:
-            counter = row
-    if operation == "get":
-        return eachNewestRow[counter]
-    if operation == "type":
-        return counter
-    if operation == "del":
-        with open(databases[counter]) as csv_file:
-            csv_reader = csv.reader(csv_file, delimiter=",")
-            data = []
-            for row in csv_reader:
-                data.append(row)
-            del data[-1]
-        with open(databases[counter], "w+") as csv_file:
-            writer = csv.writer(csv_file)
-            writer.writerows(data)
-    return
+#deletes the newest row in the search query db
+
+def delNewestRow():
+    with open(search.getDatabase()) as csv_file:
+        csv_reader = csv.reader(csv_file, delimiter=",")
+        data = []
+        for row in csv_reader:
+            data.append(row)
+        del data[-1]
+    with open(search.getDatabase(), "w+") as csv_file:
+        writer = csv.writer(csv_file)
+        writer.writerows(data)
+
 
 
 # Searches pokedex for pokemon and returns pokedex entry
@@ -200,11 +167,11 @@ async def getRedditLink(messageData):
 # Deletes last bot command in channel given message was sent in
 
 async def deleteLastCommand(message):
-    row = newestRow('get')
+    row = getNewestRow()
     botMessage = await message.channel.fetch_message(row[0])
     userMessage = await message.channel.fetch_message(row[1])
     await message.channel.delete_messages([botMessage, userMessage, message])
-    newestRow('del')
+    delNewestRow()
     return
 
 # returns formatted user bot usage stats. content is empty returns all, else returns stats of given command
@@ -393,10 +360,7 @@ async def handleMessage(message):
 # Initialises databases
 
 def initDatabases():
-    open(ytdb(), 'w').close()
-    open(wikidb(), 'w').close()
-    open(gidb(), 'w').close()
-    open(codb(), 'w').close()
+    open(search.getDatabase(), 'w').close()
     return
     
 

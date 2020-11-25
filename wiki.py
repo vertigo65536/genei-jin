@@ -20,7 +20,7 @@ def search(message, n):
 # Increments an existing search result message, taking the query message,
 # the result message and the operation as params
 
-async def increment(wikiMessage, message, operation):
+async def increment(wikiMessage, message, operation, db):
     if operation == "+":
         newCounter = int(wikiMessage[3])+1
     elif operation == "-":
@@ -31,10 +31,5 @@ async def increment(wikiMessage, message, operation):
         newCounter = 0
     newUrl = search(wikiMessage[2], newCounter)
     await message.edit(content=newUrl)
-    updateCounter(message.id, getDatabase(), newCounter)
+    updateCounter(message.id, db, newCounter)
     return
-
-# Returns the wiki message database path
-
-def getDatabase():
-    return os.path.join(os.path.dirname(os.path.abspath(__file__)), "wiki.csv")
