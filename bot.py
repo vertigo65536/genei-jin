@@ -235,6 +235,14 @@ async def awardTrophy(trophyId, user, message):
         await awardTrophy("plat", user, message)
 
 
+async def changeNickname(message):
+    messageSplit = message.content.split(' ')
+    userId = tools.getUserId(messageSplit[1])
+    del messageSplit[0]
+    del messageSplit[0]
+    await message.guild.get_member(int(userId)).edit(nick=" ".join(messageSplit))
+    return
+
 # Takes a recieved message and checks if it is a bot function.
 # Executes it if so
 
@@ -272,6 +280,10 @@ async def handleMessage(message):
         cmd = 1
         stat = prefix
         output = await setTopic(message)
+    elif prefix == "%nick":
+        cmd = 1
+        stat = prefix
+        output = await changeNickname(message)
     elif prefix == "%man" or prefix == "%help":
         cmd = 1
         stat = "%man"

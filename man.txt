@@ -32,6 +32,8 @@
 >  Returns all your attained achivements
 >  **%trophystat / %ts**
 >  Returns all trophies ordered by attained rate
+>  **%nick <user>**
+>  Sets nick of user
 >  **%man:**
 >  returns this man page
 >  **%help:**
