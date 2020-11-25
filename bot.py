@@ -380,8 +380,11 @@ def initDatabases():
 
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
-client = discord.Client()
+intents = discord.Intents.default()
+intents.members = True
+client = discord.Client(intents=intents)
 initDatabases()
+
 
 @client.event
 async def on_ready():
