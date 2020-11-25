@@ -33,17 +33,17 @@ def search(message, n, method = 0):
               'ts2': endstamp}
     elif method == 3:
         timestamps = combio_api.getAllTimestamps(result)
-        startstamp = timestamps[(len(timestamps) - 1)//2]['ts1']
-        for i in range((len(timestamps) - 1)//2):
-            teststamp = timestamps[(len(timestamps) - 1)//2 - i]['ts1']
+        startstamp = timestamps[len(timestamps)//2]['ts1']
+        for i in range(len(timestamps)//2):
+            teststamp = timestamps[len(timestamps)//2 - i]['ts1']
             if int(startstamp) - int(teststamp) > 10000:
-                startstamp = timestamps[(len(timestamps) - 1)//2 - i-1]['ts1']
+                startstamp = timestamps[len(timestamps)//2 - (i - 1)]['ts1']
                 key = i - 1
                 break;
         for i in range(len(timestamps)):
-            endstamp = timestamps[key + i - 1]['ts2']
+            endstamp = timestamps[key + i]['ts2']
             if (int(endstamp) - int(startstamp) > 20000):
-                endstamp = timestamps[i - 1]['ts2']
+                endstamp = timestamps[key + i - 1]['ts2']
                 break; 
         ts = {'ts1': startstamp,
               'ts2': endstamp}
