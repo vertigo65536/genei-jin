@@ -28,41 +28,26 @@ async def createSearchPost(message):
     url = ""
     embedUrl = ""
     n = 0
-    e = None
+    error = 0
+    searchType = getSearchType(prefix)
     try:
-        results = await getSearchType(prefix).search(content, n, prefix)
+        results = await searchType.search(content, n, prefix)
     except:
-        return "No answer from server"
-    if prefix == "%game":
-        for key, values in results.items():
-            e = discord.Embed(title=key)
-            for value in values:
-                cover = game.getImageUrl(value['link'])
-                e.set_thumbnail(url=cover)
-                e.add_field(
-                    name = value['console'],
-                    value = game.getFormattedRow(value),
-                    inline=False
-                )
-
-    elif prefix == "%gi":
-        e = discord.Embed()
-        n = 0
-        while gi.checkValidImageUrl(results) == 0:
-            n = n+1
-            if n >= 26:
-                return "wack"
-            results = await gi.search(content, n)
-        e.set_image(url=results)
+        url = "No answer from server"
+        error = 1
     else:
-        url = results
+        e = await searchType.getEmbed(results)
+        if e == None:
+            url = results
     if url == -1 or embedUrl == -1:
-        return "no results you fucking cuck"
+        url = "no results you fucking cuck"
+        error = 1
     createdMessage = await message.channel.send(url, embed=e)
     f = open(getDatabase(), 'a')
     f.write(str(createdMessage.id) + "," + str(message.id) + "," + str(content) + "," + str(n) + "," + prefix + "\n")
     f.close()
-    await addSelectionArrows(createdMessage)
+    if error == 0:
+        await addSelectionArrows(createdMessage)
     return
 
 

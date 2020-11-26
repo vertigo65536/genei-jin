@@ -125,3 +125,16 @@ def getFormattedRow(value):
     
 def parseDollar(dollar):
     return "£" + str("%.2f" % round(CurrencyConverter()    .convert(dollar[1:], 'USD', 'GBP'), 2))
+
+async def getEmbed(results):
+    for key, values in results.items():
+        e = discord.Embed(title=key)
+        for value in values:
+            cover = getImageUrl(value['link'])
+            e.set_thumbnail(url=cover)
+            e.add_field(
+                name = value['console'],
+                value = getFormattedRow(value),
+                inline=False
+            )
+    return e

@@ -20,6 +20,9 @@ async def search(message, n, prefix=None):
 # Increments an existing search result message, taking the query message,
 # the result message and the operation as params
 
+async def getEmbed(results):
+    return None
+
 async def increment(wikiMessage, message, operation, db):
     if operation == "+":
         newCounter = int(wikiMessage[3])+1

@@ -18,6 +18,9 @@ async def search(query, n, prefix=None):
             queryString = urllib.parse.urlencode({'v': results[n]})
             return f'http://www.youtube.com/watch?{queryString}'
 
+async def getEmbed(results):
+    return None
+
 # Edits the result number of an already searched youtube video
 # takes the original message, the query message and the operation as 
 # param

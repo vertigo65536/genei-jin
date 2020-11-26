@@ -69,6 +69,8 @@ async def increment(coMessage, message, operation, db):
     updateCounter(message.id, db, newCounter)
     return
 
+async def getEmbed(results):
+    return None
 
 def getGenType(prefix):
     genType = 0

@@ -48,6 +48,17 @@ async def increment(giMessage, message, operation, db):
     updateCounter(message.id, db, newCounter)
     return
 
+async def getEmbed(results):
+    e = discord.Embed()
+    n = 0
+    while checkValidImageUrl(results) == 0:
+        n = n+1
+        if n >= 26:
+            return "wack"
+        results = await search(content, n)
+    e.set_image(url=results)
+    return e
+
 # Checks if a url returned above returns an error
 
 def checkValidImageUrl(url):
