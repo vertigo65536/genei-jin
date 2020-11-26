@@ -5,16 +5,17 @@ from currency_converter import CurrencyConverter
 
 # Updates the database entry of result message with a new query value
 
-def updateQuery(id, databasePath, newQuery):
-    with open(databasePath) as csv_file:
+def updateQuery(id, db, newQuery, prefix):
+    with open(db) as csv_file:
         csv_reader = csv.reader(csv_file, delimiter=',')
         line_count = 0
         rows = list(csv_reader)
         for i in range(len(rows)):
             if rows[i-1][1] == str(id):
                 rows[i-1][2] = newQuery
+                rows[i-1][4] = prefix
 
-    with open(databasePath, 'w', newline='\n', encoding='utf-8') as csv_file:
+    with open(db, 'w', newline='\n', encoding='utf-8') as csv_file:
         writer = csv.writer(csv_file)
         writer.writerows(list(rows))
     return
@@ -63,10 +64,12 @@ async def incrementSearch(row, message, n, prefix):
 
 async def editQuery(message):
     db = getDatabase()
+    content = tools.getMessageContent(message.content)
+    prefix = tools.getMessagePrefix(message.content)
     row = tools.getStoredRowByQueryID(message.id, db)
-    updateQuery(message.id, db, tools.getMessageContent(message.content))
+    updateQuery(message.id, db, content, prefix)
     row = tools.getStoredRowByQueryID(message.id, db)
-    await incrementSearch(row, await message.channel.fetch_message(row[0]), 0, tools.getMessagePrefix(message.content))
+    await incrementSearch(row, await message.channel.fetch_message(row[0]), 0, prefix)
 
 
 # Parses and executes a general search result increment
