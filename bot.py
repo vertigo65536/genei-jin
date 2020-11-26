@@ -258,9 +258,10 @@ async def handleMessage(message):
         cmd = 1
         stat = prefix
         output = "pong"
-    elif prefix in ["%co", "%co+", "%co-", "%co=", "%wiki", "%yt", "%gi"]:
+    elif prefix in ["%co", "%co+", "%co-", "%co=", "%wiki", "%yt", "%gi", "%game"]:
         cmd = 1
-        trophy = prefix
+        if prefix != "%game":
+            trophy = prefix
         stat = prefix
         output = await search.createSearchPost(message)
     elif isLoneEmoji(message):

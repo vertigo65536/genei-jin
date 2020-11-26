@@ -1,5 +1,6 @@
 import csv, discord, os
-import tools, youtube, combio, wiki, gi
+import tools, youtube, combio, wiki, gi, game
+from currency_converter import CurrencyConverter
 
 
 # Updates the database entry of result message with a new query value
@@ -27,13 +28,31 @@ async def createSearchPost(message):
     url = ""
     embedUrl = ""
     n = 0
+    e = None
     if prefix in ["%co", "%co+", "%co-", "%co="]:
-        url = combio.search(content, n, getCoGenType(prefix))
+        url = combio.search(content, n, prefix)
     elif prefix == "%wiki":
         url = wiki.search(content, n)
     elif prefix == "%yt":
         url = await youtube.search(content, n)
+    elif prefix == "%game":
+        results = await game.search(content, n)
+        for key, values in results.items():
+            e = discord.Embed(title=key)
+            for value in values:
+                #cover = gi.search(key + " PAL box art", 1)
+                cover = game.getImageUrl(value['link'])
+                e.set_thumbnail(url=cover)
+                e.add_field(
+                    name = value['console'],
+                    value = "Loose: £" + str("%.2f" % round(CurrencyConverter().convert(value['used_price'][1:], 'USD', 'GBP'), 2)) +
+                            "\nCIB: £" + str("%.2f" % round(CurrencyConverter().convert(value['cib_price'][1:], 'USD', 'GBP'), 2)) + 
+                            "\nNew: £" + str("%.2f" % round(CurrencyConverter().convert(value['new_price'][1:], 'USD', 'GBP'), 2)),  
+                    inline=False
+                )
+
     elif prefix == "%gi":
+        e.discord.Embed()
         n = 0
         embedUrl = gi.search(content, n)
         while gi.checkValidImageUrl(embedUrl) == 0:
@@ -41,16 +60,12 @@ async def createSearchPost(message):
             if n >= 26:
                 return "wack"
             embedUrl = gi.search(content, n)
+        e.set_image(url=embedUrl)
     else:
         return
     if url == -1 or embedUrl == -1:
         return "no results you fucking cuck"
-    if embedUrl == "":
-        createdMessage = await message.channel.send(url)
-    else:
-        e = discord.Embed()
-        e.set_image(url=embedUrl)
-        createdMessage = await message.channel.send(url, embed=e)
+    createdMessage = await message.channel.send(url, embed=e)
     f = open(getDatabase(), 'a')
     f.write(str(createdMessage.id) + "," + str(message.id) + "," + str(content) + "," + str(n) + "," + prefix + "\n")
     f.close()
@@ -67,6 +82,8 @@ async def incrementSearch(row, message, n, prefix):
         await wiki.increment(row, message, n, getDatabase())
     elif prefix == "%yt":
         await youtube.increment(row, message, n, getDatabase())
+    elif prefix == "%game":
+        await game.increment(row, message, n, getDatabase())
     elif prefix == "%gi":
         await gi.increment(row, message, n, getDatabase())
     await addSelectionArrows(message)
@@ -90,14 +107,7 @@ async def handleIncrement(reaction, operation, user):
     queryMessage = tools.getStoredRowByID(message.id, getDatabase())
     if queryMessage == -1:
         return -1
-    if queryMessage[4] == "%wiki":
-        await wiki.increment(queryMessage, message, operation, getDatabase())
-    if queryMessage[4] == "%yt":
-        await youtube.increment(queryMessage, message, operation, getDatabase())
-    if queryMessage[4] == "%gi":
-        await gi.increment(queryMessage, message, operation, getDatabase())
-    if queryMessage[4] in ["%co", "%co+", "%co-", "%co="]:
-        await combio.increment(queryMessage, message, operation, getDatabase(), getCoGenType(queryMessage[4]))
+    await getSearchType(queryMessage[4]).increment(queryMessage, message, operation, getDatabase())
     await reaction.remove(user)
     return
 
@@ -108,15 +118,17 @@ async def addSelectionArrows(message):
     await message.add_reaction("⏪")
     await message.add_reaction("⏩")
 
-def getCoGenType(prefix):
-    genType = 0
-    if prefix == "%co+":
-        genType = 1
-    if prefix == "%co-":
-        genType = 2
-    if prefix == "%co=":
-        genType = 3
-    return genType
+def getSearchType(prefix):
+    if prefix == "%yt":
+        return youtube
+    if prefix == "%wiki":
+        return wiki
+    if prefix == "%gi":
+        return gi
+    if "%co" in prefix:
+        return combio
+    if prefix == "%game":
+        return game
 
 #return search database
 def getDatabase():

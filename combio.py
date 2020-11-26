@@ -4,7 +4,8 @@ from tools import updateCounter
 # Searches combio, returning a video url. Takes query and result number 
 # as params
 
-def search(message, n, method = 0):
+def search(message, n, prefix):
+    method = getGenType(prefix)
     result = combio_api.search(message)
     if result == -1:
         return -1
@@ -54,7 +55,7 @@ def search(message, n, method = 0):
 # Edits an existing search result message, taking the query message, 
 # search result message and operation as params
 
-async def increment(coMessage, message, operation, db, genType):
+async def increment(coMessage, message, operation, db):
     if operation == "+":
         newCounter = int(coMessage[3])+1
     elif operation =="-":
@@ -63,7 +64,18 @@ async def increment(coMessage, message, operation, db, genType):
             newCounter = 0
     else:
         newCounter = 0
-    newUrl = search(coMessage[2], newCounter, genType)
+    newUrl = search(coMessage[2], newCounter, coMessage[4])
     await message.edit(content=newUrl)
     updateCounter(message.id, db, newCounter)
     return
+
+
+def getGenType(prefix):
+    genType = 0
+    if prefix == "%co+":
+        genType = 1
+    if prefix == "%co-":
+        genType = 2
+    if prefix == "%co=":
+        genType = 3
+    return genType
