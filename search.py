@@ -29,40 +29,33 @@ async def createSearchPost(message):
     embedUrl = ""
     n = 0
     e = None
-    if prefix in ["%co", "%co+", "%co-", "%co="]:
-        url = combio.search(content, n, prefix)
-    elif prefix == "%wiki":
-        url = wiki.search(content, n)
-    elif prefix == "%yt":
-        url = await youtube.search(content, n)
-    elif prefix == "%game":
-        results = await game.search(content, n)
+    try:
+        results = await getSearchType(prefix).search(content, n, prefix)
+    except:
+        return "No answer from server"
+    if prefix == "%game":
         for key, values in results.items():
             e = discord.Embed(title=key)
             for value in values:
-                #cover = gi.search(key + " PAL box art", 1)
                 cover = game.getImageUrl(value['link'])
                 e.set_thumbnail(url=cover)
                 e.add_field(
                     name = value['console'],
-                    value = "Loose: £" + str("%.2f" % round(CurrencyConverter().convert(value['used_price'][1:], 'USD', 'GBP'), 2)) +
-                            "\nCIB: £" + str("%.2f" % round(CurrencyConverter().convert(value['cib_price'][1:], 'USD', 'GBP'), 2)) + 
-                            "\nNew: £" + str("%.2f" % round(CurrencyConverter().convert(value['new_price'][1:], 'USD', 'GBP'), 2)),  
+                    value = game.getFormattedRow(value),
                     inline=False
                 )
 
     elif prefix == "%gi":
-        e.discord.Embed()
+        e = discord.Embed()
         n = 0
-        embedUrl = gi.search(content, n)
-        while gi.checkValidImageUrl(embedUrl) == 0:
+        while gi.checkValidImageUrl(results) == 0:
             n = n+1
             if n >= 26:
                 return "wack"
-            embedUrl = gi.search(content, n)
-        e.set_image(url=embedUrl)
+            results = await gi.search(content, n)
+        e.set_image(url=results)
     else:
-        return
+        url = results
     if url == -1 or embedUrl == -1:
         return "no results you fucking cuck"
     createdMessage = await message.channel.send(url, embed=e)
@@ -76,16 +69,7 @@ async def createSearchPost(message):
 # Updates a search post to a new result number
 
 async def incrementSearch(row, message, n, prefix):
-    if prefix in ["%co", "%co+", "%co-", "%co="]:
-        await combio.increment(row, message, n, getDatabase(), getCoGenType(prefix))
-    elif prefix == "%wiki":
-        await wiki.increment(row, message, n, getDatabase())
-    elif prefix == "%yt":
-        await youtube.increment(row, message, n, getDatabase())
-    elif prefix == "%game":
-        await game.increment(row, message, n, getDatabase())
-    elif prefix == "%gi":
-        await gi.increment(row, message, n, getDatabase())
+    await getSearchType(prefix).increment(row, message, n, getDatabase())
     await addSelectionArrows(message)
     return
 

@@ -4,7 +4,7 @@ from tools import updateCounter
 # Searches combio, returning a video url. Takes query and result number 
 # as params
 
-def search(message, n, prefix):
+async def search(message, n, prefix):
     method = getGenType(prefix)
     result = combio_api.search(message)
     if result == -1:
@@ -64,7 +64,7 @@ async def increment(coMessage, message, operation, db):
             newCounter = 0
     else:
         newCounter = 0
-    newUrl = search(coMessage[2], newCounter, coMessage[4])
+    newUrl = await search(coMessage[2], newCounter, coMessage[4])
     await message.edit(content=newUrl)
     updateCounter(message.id, db, newCounter)
     return

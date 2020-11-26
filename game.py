@@ -6,7 +6,7 @@ from currency_converter import CurrencyConverter
 # Searches youtube, taking a query and a result number as parameters
 # and returning a url
 
-async def search(query, n):
+async def search(query, n, prefix=None):
     queryString = urllib.parse.quote_plus(query)
     queryString = queryString.replace("%20", "+")
     url = 'https://www.pricecharting.com/search-products?q="' + queryString + '"&type=prices'

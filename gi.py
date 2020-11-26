@@ -6,7 +6,7 @@ from tools import updateCounter
 # Search google images, taking a query and a result number as a parameter
 # and returning a URL
 
-def search(message, n):
+async def search(message, n, prefix=None):
     response = google_images_download.googleimagesdownload()
     #content = tools.getMessageContent(message.content)
     message = message.encode('utf-8').decode('raw_unicode_escape', 'ignore')
@@ -33,7 +33,7 @@ async def increment(giMessage, message, operation, db):
             newCounter = 0
     else:
         newCounter = 0
-    newUrl = search(giMessage[2], newCounter)
+    newUrl = await search(giMessage[2], newCounter)
     while checkValidImageUrl(newUrl) == 0:
         if newCounter == 0:
             return
@@ -41,7 +41,7 @@ async def increment(giMessage, message, operation, db):
             newCounter = newCounter+1
         elif operation == "-":
             newCounter = newCounter-1
-        newUrl = search(giMessage[2], newCounter)
+        newUrl = await search(giMessage[2], newCounter)
     e = discord.Embed()
     e.set_image(url=newUrl)
     await message.edit(embed=e)

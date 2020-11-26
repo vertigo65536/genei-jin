@@ -4,7 +4,7 @@ from tools import updateCounter
 # Searches wikipedia and returns a url, taking a message and result number
 # as values
 
-def search(message, n):
+async def search(message, n, prefix=None):
     search = wikipedia.search(message)
     if len(search) == 0:
         return -1
@@ -29,7 +29,7 @@ async def increment(wikiMessage, message, operation, db):
             newCounter = 0
     else:
         newCounter = 0
-    newUrl = search(wikiMessage[2], newCounter)
+    newUrl = await search(wikiMessage[2], newCounter)
     await message.edit(content=newUrl)
     updateCounter(message.id, db, newCounter)
     return
