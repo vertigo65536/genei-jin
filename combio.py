@@ -1,4 +1,4 @@
-import os, combio_api
+import os, combio_api, discord
 from tools import updateCounter
 
 # Searches combio, returning a video url. Takes query and result number 
@@ -24,7 +24,7 @@ async def search(message, n, prefix):
               'ts2': endstamp}
     elif method == 2:
         timestamps = combio_api.getAllTimestamps(result)
-        startstamp = timestamps[0]['ts1']
+        startstamp = timestamps[2]['ts1']
         for i in range(len(timestamps)):
             endstamp = timestamps[i]['ts2']
             if (int(endstamp) - int(startstamp) > 20000):

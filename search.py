@@ -1,6 +1,5 @@
 import csv, discord, os
 import tools, youtube, combio, wiki, gi, game
-from currency_converter import CurrencyConverter
 
 
 # Updates the database entry of result message with a new query value
