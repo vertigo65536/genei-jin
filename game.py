@@ -111,19 +111,22 @@ def getImageUrl(url):
     page = requests.get(url)
     soup = BeautifulSoup(page.text, features='html.parser')
     for links in soup.findAll("div", {"class": "cover"}):
-        return links.find('img')['src']
+        link = links.find('img')['src']
+        if not urllib.parse.urlparse(link).netloc:
+            link = "https://www.pricecharting.com" + link
+        return link
 
 def getFormattedRow(value):
     string = "Loose: "
-    if value['used_price'] == "" or value['used_price'] == None:
-        string = string + "Unknown\nCIB: "
+    if value['used_price'] in ["", None, "N/A"]:
+        string = string + "Unknown or N/A\nCIB: "
     else:
         string = string + parseDollar(value['used_price']) + "\nCIB: "
-    if value['cib_price'] == "" or value['cib_price'] == None:
-        string = string + "Unknown\nNew: "
+    if value['cib_price'] in ["", None, "N/A"]:
+        string = string + "Unknown or N/A\nNew: "
     else:
         string = string + parseDollar(value['cib_price']) + "\nNew: "
-    if value['new_price'] == "" or value['new_price'] == None or value['new_price'] == "N/A":
+    if value['new_price'] in ["", None, "N/A"]:
         string = string + "Unknown or N/A"
     else:
         string = string + parseDollar(value['new_price'])
