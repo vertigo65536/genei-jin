@@ -34,8 +34,10 @@
 >  Returns all trophies ordered by attained rate
 >  **%nick <user>**
 >  Sets nick of user
->  **%game <game>**
+>  **%game:**
 >  returns approximate value of a searched game
+>  **%yu:**
+>  searches for a yugioh card and returns name/description/value
 >  **%man:**
 >  returns this man page
 >  **%help:**
