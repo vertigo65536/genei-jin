@@ -1,5 +1,5 @@
 import discord, aiohttp
-from tools import updateCounter
+from tools import updateCounter, searchResultsTest
 
 ygo_url = 'https://db.ygoprodeck.com/api/v4/cardinfo.php'
 price_url = 'http://yugiohprices.com/api/get_card_prices'
@@ -40,22 +40,15 @@ async def search(query, n, prefix=None):
 
                 break
             else:
-                await bot.say('No results')
-                return
-
-    if len(results) == 0:
-        await bot.say('No results')
-        return
-    if n > len(results) - 1:
-        return -2
-    nthResult = results[n]
-    
-    return nthResult
-    print(nthResult)
-    return nthResult
-
+                return -1
+    if searchResultsTest(results, n) == 0:
+        return results[n]
+    else:
+        return searchResultsTest(results, n)
 
 async def getEmbed(nthResult):
+    if nthResult == -1:
+        return None
     name = nthResult['name']
     type = nthResult['type']
     description = nthResult['desc']
@@ -75,24 +68,3 @@ async def getEmbed(nthResult):
     if price_min is not None and price_mean is not None:
         embed.set_footer(text = f'Minimum: ${price_min}\nAverage: ${price_mean}')
     return embed
-
-
-async def increment(yuMessage, message, operation, db):
-    if operation == "+":
-        newCounter = int(yuMessage[3])+1
-    elif operation =="-":
-        newCounter = int(yuMessage[3])-1
-        if newCounter < 0:
-            newCounter = 0 
-    else:
-        newCounter = 0
-    results = await search(yuMessage[2], newCounter)
-    if results == -1:
-        return
-    elif results == -2:
-        newCounter = 0
-        results = await search(yuMessage[2], newCounter)
-    e = await getEmbed(results)
-    await message.edit(embed = e)
-    updateCounter(message.id, db, newCounter)
-    return

@@ -26,7 +26,6 @@ async def createSearchPost(message):
     prefix = tools.getMessagePrefix(message.content)
     content = tools.getMessageContent(message.content)
     url = ""
-    embedUrl = ""
     n = 0
     error = 0
     searchType = getSearchType(prefix)
@@ -41,7 +40,7 @@ async def createSearchPost(message):
         e = await searchType.getEmbed(results)
         if e == None:
             url = results
-    if url == -1 or embedUrl == -1:
+    if results == -1:
         url = "no results you fucking cuck"
         error = 1
     createdMessage = await message.channel.send(url, embed=e)
@@ -56,7 +55,7 @@ async def createSearchPost(message):
 # Updates a search post to a new result number
 
 async def incrementSearch(row, message, n, prefix):
-    await getSearchType(prefix).increment(row, message, n, getDatabase())
+    await increment(row, message, n, getDatabase())
     await addSelectionArrows(message)
     return
 
@@ -80,7 +79,7 @@ async def handleIncrement(reaction, operation, user):
     queryMessage = tools.getStoredRowByID(message.id, getDatabase())
     if queryMessage == -1:
         return -1
-    await getSearchType(queryMessage[4]).increment(queryMessage, message, operation, getDatabase())
+    await increment(queryMessage, message, operation, getDatabase())
     await reaction.remove(user)
     return
 
@@ -104,6 +103,32 @@ def getSearchType(prefix):
         return game
     if prefix == "%yu":
         return yugioh
+
+
+async def increment(queryMessage, message, operation, db):
+    if operation == "+":
+        newCounter = int(queryMessage[3])+1
+    elif operation =="-":
+        newCounter = int(queryMessage[3])-1
+    else:
+        newCounter = 0
+    search = getSearchType(queryMessage[4])
+    results = await search.search(queryMessage[2], newCounter, queryMessage[4])
+    if results == -1:
+        return
+    elif results == -2:
+        newCounter = 0
+        results = await search.search(queryMessage[2], newCounter, queryMessage[4])
+    elif isinstance(results, int):
+        newCounter = results
+        results = await search.search(queryMessage[2], newCounter, queryMessage[4])
+    newUrl = None
+    e = await search.getEmbed(results)
+    if e == None:
+        newUrl = results
+    await message.edit(content=newUrl, embed = e)
+    tools.updateCounter(message.id, db, newCounter)
+    return
 
 #return search database
 def getDatabase():

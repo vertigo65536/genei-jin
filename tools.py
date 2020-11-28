@@ -85,3 +85,12 @@ def getUserId(user):
             return data[user]
         except:
             return -1
+
+def searchResultsTest(result, n):
+    if result == -1 or len(result) <= 0:
+        return -1
+    elif n > len(result) - 1:
+        return -2
+    elif n < 0:
+        return len(result) - 1
+    return 0

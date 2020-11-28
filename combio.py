@@ -1,5 +1,5 @@
 import os, combio_api, discord
-from tools import updateCounter
+from tools import updateCounter, searchResultsTest
 
 # Searches combio, returning a video url. Takes query and result number 
 # as params
@@ -7,8 +7,8 @@ from tools import updateCounter
 async def search(message, n, prefix):
     method = getGenType(prefix)
     result = combio_api.search(message)
-    if result == -1:
-        return -1
+    if searchResultsTest(result, n) != 0:
+        return searchResultsTest(result, n)
     result = result[n][1]
     if method == 0:
         ts = combio_api.getDefaultTimestamps(result)
@@ -51,23 +51,6 @@ async def search(message, n, prefix):
     else:
         return -1
     return combio_api.getVideoUrl(result, ts)
-
-# Edits an existing search result message, taking the query message, 
-# search result message and operation as params
-
-async def increment(coMessage, message, operation, db):
-    if operation == "+":
-        newCounter = int(coMessage[3])+1
-    elif operation =="-":
-        newCounter = int(coMessage[3])-1
-        if newCounter < 0:
-            newCounter = 0
-    else:
-        newCounter = 0
-    newUrl = await search(coMessage[2], newCounter, coMessage[4])
-    await message.edit(content=newUrl)
-    updateCounter(message.id, db, newCounter)
-    return
 
 async def getEmbed(results):
     return None

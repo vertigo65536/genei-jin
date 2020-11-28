@@ -1,6 +1,6 @@
 import aiohttp, urllib, os, re, requests, discord, wikipedia
 from bs4 import BeautifulSoup
-from tools import updateCounter
+from tools import updateCounter, searchResultsTest
 from currency_converter import CurrencyConverter
 
 # Searches youtube, taking a query and a result number as parameters
@@ -16,31 +16,9 @@ async def search(query, n, prefix=None):
         values = scrapeFromSearch(soup.find(id="games_table"))
     else:
         values = scrapeFromPage(soup, page.url)
-    if values == -1 or n >= len(values):
-        return -1
-    else:
-        return values[n]
-
-# Edits the result number of an already searched youtube video
-# takes the original message, the query message and the operation as 
-# param
-
-async def increment(gameMessage, message, operation, db):
-    if operation == "+":
-        newCounter = int(gameMessage[3])+1
-    elif operation =="-":
-        newCounter = int(gameMessage[3])-1
-        if newCounter < 0:
-            newCounter = 0 
-    else:
-        newCounter = 0
-    results = await search(gameMessage[2], newCounter)
-    if results == -1:
-        return
-    e = await getEmbed(results)
-    await message.edit(embed = e)
-    updateCounter(message.id, db, newCounter)
-    return
+    if searchResultsTest(values, n) != 0:
+        return searchResultsTest(values, n)
+    return values[n]
 
 def scrapeFromSearch(soup):
     values = []
