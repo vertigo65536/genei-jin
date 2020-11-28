@@ -1,5 +1,5 @@
 import csv, discord, os
-import tools, youtube, combio, wiki, gi, game
+import tools, youtube, combio, wiki, gi, game, yugioh
 
 
 # Updates the database entry of result message with a new query value
@@ -31,6 +31,7 @@ async def createSearchPost(message):
     error = 0
     searchType = getSearchType(prefix)
     e = None
+    results = await searchType.search(content, n, prefix)
     try:
         results = await searchType.search(content, n, prefix)
     except:
@@ -101,6 +102,8 @@ def getSearchType(prefix):
         return combio
     if prefix == "%game":
         return game
+    if prefix == "%yu":
+        return yugioh
 
 #return search database
 def getDatabase():
