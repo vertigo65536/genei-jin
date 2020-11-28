@@ -1,4 +1,4 @@
-import aiohttp, urllib, os, re, requests, discord
+import aiohttp, urllib, os, re, requests, discord, wikipedia
 from bs4 import BeautifulSoup
 from tools import updateCounter
 from currency_converter import CurrencyConverter
@@ -37,16 +37,7 @@ async def increment(gameMessage, message, operation, db):
     results = await search(gameMessage[2], newCounter)
     if results == -1:
         return
-    for key, values in results.items():
-        e = discord.Embed(title=key)
-        for value in values:
-            cover = getImageUrl(value['link'])
-            e.set_thumbnail(url=cover)
-            e.add_field(
-                name = value['console'],
-                value = getFormattedRow(value),  
-                inline = False
-            )
+    e = await getEmbed(results)
     await message.edit(embed = e)
     updateCounter(message.id, db, newCounter)
     return
@@ -139,7 +130,8 @@ async def getEmbed(results):
     if results == -1:
         return None
     for key, values in results.items():
-        e = discord.Embed(title=key)
+        wiki = getWiki(key + " " + values[0]['console'])
+        e = discord.Embed(title=key, url=wiki)
         for value in values:
             cover = getImageUrl(value['link'])
             e.set_thumbnail(url=cover)
@@ -149,3 +141,19 @@ async def getEmbed(results):
                 inline=False
             )
     return e
+
+def getWiki(query):
+    search = wikipedia.search(query, results=10)
+    if len(search) == 0:
+        return None
+    for i in range(len(search) - 1):
+        try:
+            categories = wikipedia.page(str(search[i]), auto_suggest=0).categories
+            url = wikipedia.page(str(search[i]), auto_suggest=0).url
+        except:
+            continue
+        else:
+            for j in range(len(categories) - 1):
+                if "video games" in categories[j].lower():
+                    return url
+    return None
