@@ -16,7 +16,7 @@ async def search(query, n, prefix=None):
         values = scrapeFromSearch(soup.find(id="games_table"))
     else:
         values = scrapeFromPage(soup, page.url)
-    if n >= len(values):
+    if values == -1 or n >= len(values):
         return -1
     else:
         return values[n]
@@ -84,15 +84,21 @@ def scrapeFromSearch(soup):
 
 
 def scrapeFromPage(soup, url):
-    temp = soup.find(id="product_name").getText().split("\n")
+    try:
+        temp = soup.find(id="product_name").getText().split("\n")
+    except:
+        return -1
     names = []
     for i in range(len(temp) - 1):
         if temp[i].isspace() == True or not temp[i] or temp[i] == '':
             continue
         names.append(temp[i].strip())
-    used = soup.find(id="used_price").find("span").getText().strip()
-    cib = soup.find(id="complete_price").find("span").getText().strip()
-    new = soup.find(id="new_price").find("span").getText().strip()
+    try:
+        used = soup.find(id="used_price").find("span").getText().strip()
+        cib = soup.find(id="complete_price").find("span").getText().strip()
+        new = soup.find(id="new_price").find("span").getText().strip()
+    except:
+        return -1
     value = [{names[0]:[{'console':names[1],
                           'used_price':used,
                           'cib_price':cib,
@@ -117,8 +123,8 @@ def getFormattedRow(value):
         string = string + "Unknown\nNew: "
     else:
         string = string + parseDollar(value['cib_price']) + "\nNew: "
-    if value['new_price'] == "" or value['new_price'] == None:
-        string = string + "Unknown"
+    if value['new_price'] == "" or value['new_price'] == None or value['new_price'] == "N/A":
+        string = string + "Unknown or N/A"
     else:
         string = string + parseDollar(value['new_price'])
     return string
@@ -127,6 +133,8 @@ def parseDollar(dollar):
     return "£" + str("%.2f" % round(CurrencyConverter()    .convert(dollar[1:], 'USD', 'GBP'), 2))
 
 async def getEmbed(results):
+    if results == -1:
+        return None
     for key, values in results.items():
         e = discord.Embed(title=key)
         for value in values:

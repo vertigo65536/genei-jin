@@ -30,6 +30,7 @@ async def createSearchPost(message):
     n = 0
     error = 0
     searchType = getSearchType(prefix)
+    e = None
     try:
         results = await searchType.search(content, n, prefix)
     except:
