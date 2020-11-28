@@ -1,4 +1,5 @@
 import discord, aiohttp
+from tools import updateCounter
 
 ygo_url = 'https://db.ygoprodeck.com/api/v4/cardinfo.php'
 price_url = 'http://yugiohprices.com/api/get_card_prices'
@@ -74,16 +75,21 @@ async def getEmbed(nthResult):
     return embed
 
 
-async def increment(wikiMessage, message, operation, db):
+async def increment(yuMessage, message, operation, db):
     if operation == "+":
-        newCounter = int(wikiMessage[3])+1
-    elif operation == "-":
-        newCounter = int(wikiMessage[3])-1
+        newCounter = int(yuMessage[3])+1
+    elif operation =="-":
+        newCounter = int(yuMessage[3])-1
         if newCounter < 0:
-            newCounter = 0
+            newCounter = 0 
     else:
         newCounter = 0
-    newUrl = await search(wikiMessage[2], newCounter)
-    await message.edit(content=newUrl)
+    results = await search(yuMessage[2], newCounter)
+    if results == -1:
+        return
+    e = await getEmbed(results)
+    await message.edit(embed = e)
     updateCounter(message.id, db, newCounter)
     return
+
+
