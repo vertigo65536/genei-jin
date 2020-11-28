@@ -46,6 +46,8 @@ async def search(query, n, prefix=None):
     if len(results) == 0:
         await bot.say('No results')
         return
+    if n > len(results) - 1:
+        return -2
     nthResult = results[n]
     
     return nthResult
@@ -87,9 +89,10 @@ async def increment(yuMessage, message, operation, db):
     results = await search(yuMessage[2], newCounter)
     if results == -1:
         return
+    elif results == -2:
+        newCounter = 0
+        results = await search(yuMessage[2], newCounter)
     e = await getEmbed(results)
     await message.edit(embed = e)
     updateCounter(message.id, db, newCounter)
     return
-
-
