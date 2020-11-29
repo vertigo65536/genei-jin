@@ -1,4 +1,4 @@
-import aiohttp, urllib, os, re, requests, discord, wikipedia
+import urllib, os, re, requests, discord, wikipedia
 from bs4 import BeautifulSoup
 from tools import updateCounter, searchResultsTest
 from currency_converter import CurrencyConverter
