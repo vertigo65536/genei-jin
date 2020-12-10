@@ -258,9 +258,9 @@ async def handleMessage(message):
         cmd = 1
         stat = prefix
         output = "pong"
-    elif prefix in ["%co", "%co+", "%co-", "%co=", "%wiki", "%yt", "%gi", "%game", "%yu"]:
+    elif prefix in ["%co", "%co+", "%co-", "%co=", "%wiki", "%yt", "%gi", "%game", "%yu", "%def"]:
         cmd = 1
-        if prefix not in  ["%game", "%yu"]:
+        if prefix not in  ["%game", "%yu", "%def"]:
             trophy = prefix
         stat = prefix
         output = await search.createSearchPost(message)

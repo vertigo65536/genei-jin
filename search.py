@@ -1,5 +1,5 @@
 import csv, discord, os
-import tools, youtube, combio, wiki, gi, game, yugioh
+import tools, youtube, combio, wiki, gi, game, yugioh, dictionary
 
 
 # Updates the database entry of result message with a new query value
@@ -47,7 +47,7 @@ async def createSearchPost(message):
     f = open(getDatabase(), 'a')
     f.write(str(createdMessage.id) + "," + str(message.id) + "," + str(content) + "," + str(n) + "," + prefix + "\n")
     f.close()
-    if error == 0:
+    if error == 0 and prefix not in ["%def"]:
         await addSelectionArrows(createdMessage)
     return
 
@@ -103,6 +103,8 @@ def getSearchType(prefix):
         return game
     if prefix == "%yu":
         return yugioh
+    if prefix == "%def":
+        return dictionary
 
 
 async def increment(queryMessage, message, operation, db):

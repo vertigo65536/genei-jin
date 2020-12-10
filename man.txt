@@ -35,9 +35,11 @@
 >  **%nick <user>**
 >  Sets nick of user
 >  **%game:**
->  returns approximate value of a searched game
+>  Returns approximate value of a searched game
 >  **%yu:**
->  searches for a yugioh card and returns name/description/value
+>  Searches for a yugioh card and returns name/description/value
+>  **%def:**
+>  Pulls definition of word from dictionary.com
 >  **%man:**
 >  returns this man page
 >  **%help:**
