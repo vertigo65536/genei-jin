@@ -106,7 +106,6 @@ async def getPokemon(message):
     e.add_field(name="Height", value=pokemon['height'], inline=False)
     e.add_field(name="Weight", value=pokemon['weight'], inline=False)
     e.add_field(name="Generation", value=pokemon['gen'], inline=False)
-    e.add_field(name="Description", value=pokemon['description'], inline=False)
     await message.channel.send(embed=e)
     return
 
