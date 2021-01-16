@@ -121,6 +121,8 @@ async def increment(queryMessage, message, operation, db):
     elif results == -2:
         newCounter = 0
         results = await search.search(queryMessage[2], newCounter, queryMessage[4])
+    if 'n_value' in results:
+        newCounter = results['n_value']
     elif isinstance(results, int):
         newCounter = results
         results = await search.search(queryMessage[2], newCounter, queryMessage[4])
