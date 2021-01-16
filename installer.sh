@@ -6,6 +6,7 @@ pip install you --user || pip3 install you --user
 pip install pokedex.py --user || pip3 install pokedex.py --user
 pip install python-dotenv --user || pip3 install python-dotenv --user
 pip install --user currencyconverter || pip3 install currencyconverter --user
+pip instal --user brickfront || pip3 install --user brickfront
 
 FILE=.env
 if [ ! -f "$FILE" ]; then
