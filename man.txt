@@ -40,6 +40,8 @@
 >  Searches for a yugioh card and returns name/description/value
 >  **%def:**
 >  Pulls definition of word from dictionary.com
+>  **%lego:**
+>  Searches lego sets
 >  **%man:**
 >  returns this man page
 >  **%help:**
