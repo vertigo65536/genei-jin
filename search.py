@@ -31,7 +31,6 @@ async def createSearchPost(message):
         error = 0
         searchType = getSearchType(prefix)
         e = None
-        results = await searchType.search(content, n, prefix)
         try:
             results = await searchType.search(content, n, prefix)
         except:
@@ -41,7 +40,7 @@ async def createSearchPost(message):
             e = await searchType.getEmbed(results)
             if e == None:
                 url = results
-        if results == -1:
+        if error != 1 and results == -1:
             url = "no results you fucking cuck"
             error = 1
     createdMessage = await message.channel.send(url, embed=e)
