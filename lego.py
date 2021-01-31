@@ -33,11 +33,12 @@ async def search(query, n, prefix=None):
         return -1
     return result[n]
 
-async def getEmbed(results):
+async def getEmbed(results, colour):
     if results == -1:
          return None
     e = discord.Embed(title=results['name'],
-        url=results['bricksetURL']
+        url=results['bricksetURL'],
+        colour = colour
     )
     e.set_image(url=results['image']['imageURL'])
     e.add_field(name='Rating',

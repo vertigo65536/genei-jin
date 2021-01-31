@@ -20,8 +20,8 @@ async def search(message, n, prefix=None):
             return link
     return link
 
-async def getEmbed(results):
-    e = discord.Embed()
+async def getEmbed(results, colour):
+    e = discord.Embed(colour=colour)
     e.set_image(url=results)
     return e
 

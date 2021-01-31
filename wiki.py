@@ -15,5 +15,5 @@ async def search(message, n, prefix=None):
         page = "https://en.wikipedia.org/wiki/" + str(nthSearch)
     return page
 
-async def getEmbed(results):
+async def getEmbed(results, colour):
     return None

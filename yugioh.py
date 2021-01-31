@@ -49,7 +49,7 @@ async def search(query, n, prefix=None):
         results['n_value'] = searchTest
     return results
 
-async def getEmbed(nthResult):
+async def getEmbed(nthResult, colour):
     if nthResult == -1:
         return None
     name = nthResult['name']
@@ -68,7 +68,7 @@ async def getEmbed(nthResult):
                     price_min = priceResult[i]['price_data']['data']['prices']['low']
                     price_mean = priceResult[i]['price_data']['data']['prices']['average']
                     break
-    embed = discord.Embed(title = name, description = description)
+    embed = discord.Embed(title = name, description = description, colour=colour)
     embed.set_image(url = image_url)
 
     if price_min is not None and price_mean is not None:

@@ -52,7 +52,7 @@ async def search(message, n, prefix):
         return -1
     return combio_api.getVideoUrl(result, ts)
 
-async def getEmbed(results):
+async def getEmbed(results, colour):
     return None
 
 def getGenType(prefix):

@@ -104,12 +104,12 @@ def getFormattedRow(value):
 def parseDollar(dollar):
     return "£" + str("%.2f" % round(CurrencyConverter()    .convert(dollar[1:], 'USD', 'GBP'), 2))
 
-async def getEmbed(results):
+async def getEmbed(results, colour):
     if results == -1:
         return None
     for key, values in results.items():
         wiki = getWiki(key + " " + values[0]['console'])
-        e = discord.Embed(title=key, url=wiki)
+        e = discord.Embed(title=key, url=wiki, colour=colour)
         for value in values:
             cover = getImageUrl(value['link'])
             e.set_thumbnail(url=cover)

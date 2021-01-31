@@ -37,7 +37,7 @@ async def createSearchPost(message):
             url = "No answer from server"
             error = 1
         else:
-            e = await searchType.getEmbed(results)
+            e = await searchType.getEmbed(results, tools.getUserColour(message))
             if e == None:
                 url = results
         if error != 1 and results == -1:
@@ -129,7 +129,7 @@ async def increment(queryMessage, message, operation, db):
         newCounter = results
         results = await search.search(queryMessage[2], newCounter, queryMessage[4])
     newUrl = None
-    e = await search.getEmbed(results)
+    e = await search.getEmbed(results, tools.getUserColour(message))
     if e == None:
         newUrl = results
     await message.edit(content=newUrl, embed = e)

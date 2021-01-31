@@ -40,13 +40,14 @@ async def search(message, n, prefix=None):
     except:
         return -1
 
-async def getEmbed(results):
+async def getEmbed(results, colour):
     if results == -1:
         return None
     e = discord.Embed(
         title=results['title'],
         url=results['url'],
-        description=results['pronunciation']
+        description=results['pronunciation'],
+        colour=colour
     )
     for key, values in results.items():
         if key not in ['title', 'url', 'pronunciation']:
