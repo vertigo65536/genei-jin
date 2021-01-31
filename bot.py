@@ -236,7 +236,7 @@ async def awardTrophy(trophyId, user, message):
 
 async def changeNickname(message):
     messageSplit = message.content.split(' ')
-    userId = tools.getUserId(messageSplit[1])
+    userId = tools.getUserId(messageSplit[1].lower())
     del messageSplit[0]
     del messageSplit[0]
     await message.guild.get_member(int(userId)).edit(nick=" ".join(messageSplit))
