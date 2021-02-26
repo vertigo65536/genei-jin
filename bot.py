@@ -1,4 +1,4 @@
-import os, re, requests, discord, json, time, urllib, csv, subprocess
+import os, re, requests, discord, json, time, urllib, csv, subprocess, aiohttp
 import search, tools, stats
 from pokedex import pokedex
 from bs4 import BeautifulSoup
@@ -17,6 +17,17 @@ def isLoneEmoji(message):
 
 # Posts a larger version of an emoji, and deletes the original message.
 # Sets colour as original user's colour
+
+async def randomJoke():
+    async with aiohttp.ClientSession() as session:
+        async with session.get('https://official-joke-api.appspot.com/random_joke') as r:
+            if r.status != 200:
+                raise RuntimeError(f'{r.status} - {r.reason}')
+            returnJson = (await r.json())
+            outputString = returnJson['setup'] + "\n\n||" + returnJson['punchline'] + "||"
+            return outputString
+            
+ 
 
 async def bigmoji(message):
     id = message.content[1:-1].split(':')[2]
@@ -296,6 +307,10 @@ async def handleMessage(message):
         cmd = 1
         stat = prefix
         output = getLuckyG(content)
+    elif prefix == "%joke":
+        cmd = 1
+        stat = prefix
+        output = await randomJoke()
     elif message.content.lower().startswith("the gang "):
         cmd = 1
         stat = "sunny"
