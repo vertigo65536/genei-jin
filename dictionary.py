@@ -22,7 +22,7 @@ async def search(message, n, prefix=None):
         wordInfo['url'] = url
         wordInfo['title'] = soup.find('h1').getText()
         wordInfo['pronunciation'] = soup.find('span', {'class': 'pron-spell-content'}).getText()
-        for definition in definitionBlock.findAll('section', {'class': 'e1hk9ate0'}):
+        for definition in definitionBlock.findAll('section', {'class': 'e1hk9ate4'}):
             definitionType = definition.find('h3').getText().strip().rstrip() 
             wordInfo[definitionType] = []
             for defInstance in definition.findAll('span', {'class': 'one-click-content'}):
