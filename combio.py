@@ -50,7 +50,10 @@ async def search(message, n, prefix):
               'ts2': endstamp}
     else:
         return -1
-    return combio_api.getVideoUrl(result, ts)
+    videoData = combio_api.getVideoData(result, ts)
+    outputString = "``" + videoData['episode'] + '``\n' + videoData['link']
+    return outputString
+
 
 async def getEmbed(results, colour):
     return None
