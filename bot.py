@@ -364,6 +364,8 @@ async def handleMessage(message):
             cmd = 1
             stat = "delete"
             output = await deleteLastCommand(message)
+        elif prefix.lower() in ["/gdq", "/schedule"]:
+            output = "https://pbs.twimg.com/media/D9yQ4dlXUAACQtH.jpg"
         elif prefix == "%stats":
             cmd = 1
             stat = prefix
