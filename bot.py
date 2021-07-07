@@ -3,7 +3,7 @@ import search, tools, stats
 from pokedex import pokedex
 from bs4 import BeautifulSoup
 from dotenv import load_dotenv
-
+from PIL import Image
 
 # Checks if a message only contains a single emoji, and no attachment
 
@@ -120,6 +120,31 @@ async def getPokemon(message):
     await message.channel.send(embed=e)
     return
 
+#Get text from image
+
+def ocr_space_url(url, overlay, api_key, language='eng'):
+    """ OCR.space API request with remote file.
+        Python3.5 - not tested on 2.7
+    :param url: Image url.
+    :param overlay: Is OCR.space overlay required in your response.
+                    Defaults to False.
+    :param api_key: OCR.space API key.
+                    Defaults to 'helloworld'.
+    :param language: Language code to be used in OCR.
+                    List of available language codes can be found on https://ocr.space/OCRAPI
+                    Defaults to 'en'.
+    :return: Result in JSON format.
+    """
+
+    payload = {'url': url,
+               'isOverlayRequired': overlay,
+               'apikey': api_key,
+               'language': language,
+               }
+    r = requests.post('https://api.ocr.space/parse/image',
+                      data=payload,
+                      )
+    return json.loads(r.content.decode())
 
 # Returns imfeelinglucky search result for DuckDuckGo
 
@@ -257,132 +282,141 @@ async def changeNickname(message):
 # Executes it if so
 
 async def handleMessage(message):
-    prefix = tools.getMessagePrefix(message.content)
-    content = tools.getMessageContent(message.content)
-    output = ""
-    trophy = -1
     stat = -1
+    trophy = -1
+    output = ""
     cmd = 0
-    recieveId = message.author.id
-    if prefix == "%ping":
-        cmd = 1
-        stat = prefix
-        output = "pong"
-    elif prefix in ["%co", "%co+", "%co-", "%co=", "%wiki", "%yt", "%gi", "%game", "%yu", "%def", "%lego"]:
-        cmd = 1
-        if prefix not in  ["%game", "%yu", "%def", "%lego"]:
-            trophy = prefix
-        stat = prefix
-        output = await search.createSearchPost(message)
-    elif isLoneEmoji(message):
-        cmd = 1
-        trophy = "bigmoji"
-        stat = "bigmoji"
-        output = await bigmoji(message)
-    elif prefix == "%title":
-        cmd = 1
-        stat = prefix
-        output = await setTitle(message)
-    elif prefix == "%ctitle":
-        cmd = 1
-        stat = prefix
-        output = await setChannelTitle(message)
-    elif prefix == "%topic":
-        cmd = 1
-        stat = prefix
-        output = await setTopic(message)
-    elif prefix == "%nick":
-        cmd = 1
-        stat = prefix
-        output = await changeNickname(message)
-    elif prefix == "%man" or prefix == "%help":
-        cmd = 1
-        stat = "%man"
-        output = getManPage()
-    elif prefix == "%dex":
-        cmd = 1
-        stat = prefix
-        output = await getPokemon(message)
-    elif prefix == "%lucky":
-        cmd = 1
-        stat = prefix
-        output = getLuckyG(content)
-    elif prefix == "%joke":
-        cmd = 1
-        stat = prefix
-        output = await randomJoke()
-    elif message.content.lower().startswith("the gang "):
-        cmd = 1
-        stat = "sunny"
-        output = await sunnySub(message)
-    elif prefix == "%canyoufitabillionmothsin32hamptonroad'slivingroom":
-        trophy = "hampton"
-        cmd = 1
-        stat = prefix
-        output = "Yes"
-    elif "69" in message.content.split(" "):
-       trophy = "nice"
-       stat = "69"
-       await message.add_reaction("🇳")
-       await message.add_reaction("🇮")
-       await message.add_reaction("🇨")
-       await message.add_reaction("🇪")
-    elif message.content == "`":
-        cmd = 1
-        stat = "delete"
-        output = await deleteLastCommand(message)
-    elif prefix == "%stats":
-        cmd = 1
-        stat = prefix
-    elif any(word in str.lower(message.content) for word in ['shid', 'shidding', 'shidded', 'fard', 'farding', 'farded']):
-        stat = "shidandfard"
-        trophy = "shid"
-    elif prefix == "%bugreport":
-        if str(message.author.id) != os.getenv('ADMIN_ID'):
-            output = "not admin"
-        else:
-            recieveId = tools.getUserId(content)
-            output = await awardTrophy("bug", recieveId, message) 
-    elif prefix == "%featurerequest":
-        if str(message.author.id) != os.getenv('ADMIN_ID'):
-            output = "not admin"
-        else:
-            recieveId = tools.getUserId(content)
-            output = await awardTrophy("feature", recieveId, message)
-    elif prefix == "%trophylist" or prefix == "%tl":
-        output = stats.getReadableTrophyList()
-    elif prefix == "%mytrophys" or prefix == "%mt":
-        trophys = stats.getTrophyList()
-        for key in trophys:
-            if stats.getTrophyValue(message.author.id, key) == "True":
-                await trophyPost(key, message, message.author.id)
-    elif prefix == "%trophystat" or prefix == "%ts":
-        trophys = stats.getTrophyList()
-        trophyArray = []
-        for key in trophys:
-            trophyArray.append([trophys[key]['name'], int(stats.getTrophyStat(key))])
-        trophyArray = sorted(trophyArray, key=lambda x: x[1], reverse=True)
-        string = ""
-        for i in range(len(trophyArray)):
-            string = string + trophyArray[i][0] + ": " + str(trophyArray[i][1]) + "%\n"
-        return string
-    if stat != -1:
-        stats.checkAndCreateStats(message.author.id)
-        stats.checkAndCreateTrophy(message.author.id)
-        stats.writeStat(str(message.author.id), stat)
-    if cmd == 1:
-        stats.writeStat(str(message.author.id), "all")
-        await trophyProcess("first", message)
-        await trophyProcess("cmds", message)
-    if message.content[0] == "/":
-        await trophyProcess("cylon", message)
-    if trophy != -1:
-        await trophyProcess(trophy, message)
-    if prefix == "%stats":
-        output = getStats(message.author, content)
-    await getRedditLink(message)
-    if stats.checkPlat(recieveId) == 1:
-        await awardTrophy("plat", recieveId, message)
+    if len(message.attachments) > 0 :
+        for attachment in message.attachments:
+            imageText = ocr_space_url(attachment.url, False, OCR)
+            if "69" in imageText['ParsedResults'][0]['ParsedText']:
+                await message.add_reaction("🇳")
+                await message.add_reaction("🇮")
+                await message.add_reaction("🇨")
+                await message.add_reaction("🇪") 
+    if len(message.content) > 0:
+        prefix = tools.getMessagePrefix(message.content)
+        content = tools.getMessageContent(message.content)
+        recieveId = message.author.id
+        if prefix == "%ping":
+            cmd = 1
+            stat = prefix
+            output = "pong"
+        elif prefix in ["%co", "%co+", "%co-", "%co=", "%wiki", "%yt", "%gi", "%game", "%yu", "%def", "%lego"]:
+            cmd = 1
+            if prefix not in  ["%game", "%yu", "%def", "%lego"]:
+                trophy = prefix
+            stat = prefix
+            output = await search.createSearchPost(message)
+        elif isLoneEmoji(message):
+            cmd = 1
+            trophy = "bigmoji"
+            stat = "bigmoji"
+            output = await bigmoji(message)
+        elif prefix == "%title":
+            cmd = 1
+            stat = prefix
+            output = await setTitle(message)
+        elif prefix == "%ctitle":
+            cmd = 1
+            stat = prefix
+            output = await setChannelTitle(message)
+        elif prefix == "%topic":
+            cmd = 1
+            stat = prefix
+            output = await setTopic(message)
+        elif prefix == "%nick":
+            cmd = 1
+            stat = prefix
+            output = await changeNickname(message)
+        elif prefix == "%man" or prefix == "%help":
+            cmd = 1
+            stat = "%man"
+            output = getManPage()
+        elif prefix == "%dex":
+            cmd = 1
+            stat = prefix
+            output = await getPokemon(message)
+        elif prefix == "%lucky":
+            cmd = 1
+            stat = prefix
+            output = getLuckyG(content)
+        elif prefix == "%joke":
+            cmd = 1
+            stat = prefix
+            output = await randomJoke()
+        elif message.content.lower().startswith("the gang "):
+            cmd = 1
+            stat = "sunny"
+            output = await sunnySub(message)
+        elif prefix == "%canyoufitabillionmothsin32hamptonroad'slivingroom":
+            trophy = "hampton"
+            cmd = 1
+            stat = prefix
+            output = "Yes"
+        elif "69" in message.content:
+            trophy = "nice"
+            stat = "69"
+            await message.add_reaction("🇳")
+            await message.add_reaction("🇮")
+            await message.add_reaction("🇨")
+            await message.add_reaction("🇪")
+        elif message.content == "`":
+            cmd = 1
+            stat = "delete"
+            output = await deleteLastCommand(message)
+        elif prefix == "%stats":
+            cmd = 1
+            stat = prefix
+        elif any(word in str.lower(message.content) for word in ['shid', 'shidding', 'shidded', 'fard', 'farding', 'farded']):
+            stat = "shidandfard"
+            trophy = "shid"
+        elif prefix == "%bugreport":
+            if str(message.author.id) != os.getenv('ADMIN_ID'):
+                output = "not admin"
+            else:
+                recieveId = tools.getUserId(content)
+                output = await awardTrophy("bug", recieveId, message) 
+        elif prefix == "%featurerequest":
+            if str(message.author.id) != os.getenv('ADMIN_ID'):
+                output = "not admin"
+            else:
+                recieveId = tools.getUserId(content)
+                output = await awardTrophy("feature", recieveId, message)
+        elif prefix == "%trophylist" or prefix == "%tl":
+            output = stats.getReadableTrophyList()
+        elif prefix == "%mytrophys" or prefix == "%mt":
+            trophys = stats.getTrophyList()
+            for key in trophys:
+                if stats.getTrophyValue(message.author.id, key) == "True":
+                    await trophyPost(key, message, message.author.id)
+        elif prefix == "%trophystat" or prefix == "%ts":
+            trophys = stats.getTrophyList()
+            trophyArray = []
+            for key in trophys:
+                trophyArray.append([trophys[key]['name'], int(stats.getTrophyStat(key))])
+            trophyArray = sorted(trophyArray, key=lambda x: x[1], reverse=True)
+            string = ""
+            for i in range(len(trophyArray)):
+                string = string + trophyArray[i][0] + ": " + str(trophyArray[i][1]) + "%\n"
+            return string
+        if stat != -1:
+            stats.checkAndCreateStats(message.author.id)
+            stats.checkAndCreateTrophy(message.author.id)
+            stats.writeStat(str(message.author.id), stat)
+        if cmd == 1:
+            stats.writeStat(str(message.author.id), "all")
+            await trophyProcess("first", message)
+            await trophyProcess("cmds", message)
+        if message.content[0] == "/":
+            await trophyProcess("cylon", message)
+        if trophy != -1:
+            await trophyProcess(trophy, message)
+        if prefix == "%stats":
+            output = getStats(message.author, content)
+        await getRedditLink(message)
+        if stats.checkPlat(recieveId) == 1:
+            await awardTrophy("plat", recieveId, message)
     return output
     
 
@@ -395,6 +429,7 @@ def initDatabases():
 
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
+OCR = os.getenv('OCR_SPACE')
 intents = discord.Intents.default()
 intents.members = True
 client = discord.Client(intents=intents)
