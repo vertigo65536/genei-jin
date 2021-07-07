@@ -3,7 +3,6 @@ import search, tools, stats
 from pokedex import pokedex
 from bs4 import BeautifulSoup
 from dotenv import load_dotenv
-from PIL import Image
 
 # Checks if a message only contains a single emoji, and no attachment
 
