@@ -301,6 +301,10 @@ async def handleMessage(message):
             cmd = 1
             stat = prefix
             output = "pong"
+        elif message.content.lower() == "fuck you":
+            output = 'Don\'t know how to "FUCK" something.'
+        elif message.content.lower() == "eat pillow":
+            output = "Yuck!"
         elif prefix in ["%co", "%co+", "%co-", "%co=", "%wiki", "%yt", "%gi", "%game", "%yu", "%def", "%lego"]:
             cmd = 1
             if prefix not in  ["%game", "%yu", "%def", "%lego"]:
