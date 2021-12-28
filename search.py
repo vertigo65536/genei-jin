@@ -123,6 +123,8 @@ def getSearchType(prefix):
                 "%office",
                 "%toi",
                 "%thickofit",
+                "%log",
+                "%leagueofgentlemen"
             ]:
         return gifglobe
 

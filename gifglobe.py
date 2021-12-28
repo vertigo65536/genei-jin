@@ -9,6 +9,7 @@ timeout = 30
 
 async def search(query, n, prefix=None):
     baseurl = '.gifglobe.com/'
+    baseurl2 = '.cloud/'
     protocol = 'https://'
     if prefix in ['%ft', '%fatherted']:
         url = protocol + 'fatherted' + baseurl
@@ -19,13 +20,15 @@ async def search(query, n, prefix=None):
     elif prefix in ['%bb', '%blackbooks']:
         url = protocol + 'blackbooks' + baseurl
     elif prefix in ['%ap', '%alanpartridge']:
-        url = protocol + 'partridge.cloud/'
+        url = protocol + 'partridge' + baseurl2
     elif prefix in ['%ps', '%peepshow']:
         url = protocol + 'peepshow' + baseurl
     elif prefix in ['%office']:
-        url = protocol + 'brent.cloud/'
+        url = protocol + 'brent' + baseurl2
     elif prefix in ['%toi', '%thickofit']:
         url = protocol + 'thethickofit' + baseurl
+    elif prefix in ['%log', '%leagueofgentlemen']:
+        url = protocol + 'leagueofgentlemen' + baseurl
     urlList = getSearchResultsList(query, url)
     sceneData = getSceneData(urlList[n])
     print(sceneData)

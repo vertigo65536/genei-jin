@@ -331,7 +331,9 @@ async def handleMessage(message):
                     "%peepshow",
                     "%office",
                     "%toi",
-                    "%thickofit"
+                    "%thickofit",
+                    "%log",
+                    "%leagueofgentlemen"
                 ]:
             cmd = 1
             if prefix not in  [
@@ -352,9 +354,11 @@ async def handleMessage(message):
                             "%alanpartridge",
                             "%ps",
                             "%peepshow",
-                            "office",
+                            "%office",
                             "%toi",
-                            "%thickofit"
+                            "%thickofit",
+                            "%log",
+                            "%leagueofgentlemen"
                         ]:
                 trophy = prefix
             stat = prefix
