@@ -46,5 +46,5 @@
 >  returns this man page
 >  **%help:**
 >  alias to %man
-> **%ft, %fatherted", %mb, %mightyboosh, %dt, %daytoday, %bb, %blackbooks, %ap, %alanpartridge, ps, %peepshow, %office, %toi, %thickofit:**
+> **%ft, %fatherted", %mb, %mightyboosh, %dt, %daytoday, %bb, %blackbooks, %ap, %alanpartridge, ps, %peepshow, %office, %toi, %thickofit, %log, %leagueofgentlemen:**
 >  All search TV shows for gifs

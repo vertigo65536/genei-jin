@@ -31,7 +31,7 @@ async def randomJoke():
 async def bigmoji(message):
     id = message.content[1:-1].split(':')[2]
     imageUrl = "https://cdn.discordapp.com/emojis/" + id
-    e = discord.Embed(colour=tools.getUserColour(message))
+    e = discord.Embed(colour=tools.getUserColour(message.author))
     e.set_image(url=imageUrl)
     await message.channel.send("", embed=e)
     await message.delete()

@@ -66,10 +66,11 @@ def updateCounter(id, databasePath, newN):
 
 # Determines a user's colour and returns it
 
-def getUserColour(message):
+
+def getUserColour(user):
     bestColour = "#000000"
     bestRank = 0 
-    for role in message.author.roles:
+    for role in user.roles:
         if role.position > bestRank and str(role.colour) != "#000000":
             bestColour = role.colour
     return bestColour

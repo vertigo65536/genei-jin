@@ -37,7 +37,7 @@ async def createSearchPost(message):
             url = "No answer from server"
             error = 1
         else:
-            e = await searchType.getEmbed(results, tools.getUserColour(message))
+            e = await searchType.getEmbed(results, tools.getUserColour(message.author))
             if e == None:
                 url = results
         if error != 1 and results == -1:
@@ -79,7 +79,7 @@ async def handleIncrement(reaction, operation, user):
     queryMessage = tools.getStoredRowByID(message.id, getDatabase())
     if queryMessage == -1:
         return -1
-    await increment(queryMessage, message, operation, getDatabase())
+    await increment(queryMessage, message, operation, getDatabase(), user)
     await reaction.remove(user)
     return
 
@@ -129,7 +129,7 @@ def getSearchType(prefix):
         return gifglobe
 
 
-async def increment(queryMessage, message, operation, db):
+async def increment(queryMessage, message, operation, db, user=None):
     if operation == "+":
         newCounter = int(queryMessage[3])+1
     elif operation =="-":
@@ -149,7 +149,11 @@ async def increment(queryMessage, message, operation, db):
         newCounter = results
         results = await search.search(queryMessage[2], newCounter, queryMessage[4])
     newUrl = None
-    e = await search.getEmbed(results, tools.getUserColour(message))
+    if user == None:
+        colour = tools.getUserColour(message.author)
+    else:
+        colour = tools.getUserColour(user)
+    e = await search.getEmbed(results, colour)
     if e == None:
         newUrl = results
     await message.edit(content=newUrl, embed = e)
