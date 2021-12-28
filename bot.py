@@ -405,7 +405,7 @@ async def handleMessage(message):
             cmd = 1
             stat = prefix
             output = "Yes"
-        elif "69" in message.content:
+        elif "69" in message.content.split(" "):
             trophy = "nice"
             stat = "69"
             await message.add_reaction("🇳")
