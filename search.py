@@ -1,5 +1,5 @@
 import csv, discord, os
-import tools, youtube, combio, wiki, gi, game, yugioh, dictionary, lego
+import tools, youtube, combio, wiki, gi, game, yugioh, dictionary, lego, gifglobe
 
 
 # Updates the database entry of result message with a new query value
@@ -107,6 +107,24 @@ def getSearchType(prefix):
         return dictionary
     if prefix == "%lego":
         return lego
+    if prefix in [
+                "%ft",
+                "%fatherted",
+                "%mb",
+                "%mightyboosh",
+                "%dt",
+                "%daytoday",
+                "%bb",
+                "%blackbooks",
+                "%ap",
+                "%alanpartridge",
+                "%ps",
+                "%peepshow",
+                "%office",
+                "%toi",
+                "%thickofit",
+            ]:
+        return gifglobe
 
 
 async def increment(queryMessage, message, operation, db):

@@ -305,9 +305,57 @@ async def handleMessage(message):
             output = 'Don\'t know how to "FUCK" something.'
         elif message.content.lower() == "eat pillow":
             output = "Yuck!"
-        elif prefix in ["%co", "%co+", "%co-", "%co=", "%wiki", "%yt", "%gi", "%game", "%yu", "%def", "%lego"]:
+        elif prefix in [
+                    "%co",
+                    "%co+",
+                    "%co-",
+                    "%co=",
+                    "%wiki",
+                    "%yt",
+                    "%gi",
+                    "%game",
+                    "%yu",
+                    "%def",
+                    "%lego",
+                    "%ft",
+                    "%fatherted",
+                    "%mb",
+                    "%mightyboosh",
+                    "%dt",
+                    "%daytoday",
+                    "%bb",
+                    "%blackbooks",
+                    "%ap",
+                    "%alanpartridge",
+                    "%ps",
+                    "%peepshow",
+                    "%office",
+                    "%toi",
+                    "%thickofit"
+                ]:
             cmd = 1
-            if prefix not in  ["%game", "%yu", "%def", "%lego"]:
+            if prefix not in  [
+                            "%game",
+                            "%yu",
+                            "%def",
+                            "%lego",
+                            "%ft",
+                            "%ft",
+                            "%fatherted",
+                            "%mb",
+                            "%mightyboosh",
+                            "%dt",
+                            "%daytoday",
+                            "%bb",
+                            "%blackbooks",
+                            "%ap",
+                            "%alanpartridge",
+                            "%ps",
+                            "%peepshow",
+                            "office",
+                            "%toi",
+                            "%thickofit"
+                        ]:
                 trophy = prefix
             stat = prefix
             output = await search.createSearchPost(message)
