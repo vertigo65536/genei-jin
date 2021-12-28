@@ -244,7 +244,8 @@ async def trophyPost(trophyId, message, user):
 # Check if a user has earned a trophy, and if so, awards it
  
 async def trophyProcess(trophyId, message):
-    if message.guild.id not in ['731319735404462253', '370919425517551616']:
+    print(message.guild.id)
+    if message.guild.id not in [731319735404462253, 370919425517551616]:
         return
     if message.author.bot == True:
         return
