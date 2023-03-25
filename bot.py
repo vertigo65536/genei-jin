@@ -1,8 +1,15 @@
-import os, re, requests, discord, json, time, urllib, csv, subprocess, aiohttp
+import os, re, requests, discord, json, time, urllib, csv, subprocess, aiohttp, openai
 import search, tools, stats
 from pokedex import pokedex
 from bs4 import BeautifulSoup
 from dotenv import load_dotenv
+
+#Gets a response from chatGPT from a prompt
+
+def chatgpt(prompt):
+    openai.api_key = os.getenv("OPENAI_API_KEY")
+    response = openai.Completion.create(model="text-davinci-003", prompt=prompt, temperature=0, max_tokens=380)
+    return response['choices'][0]['text']
 
 # Checks if a message only contains a single emoji, and no attachment
 
@@ -297,6 +304,7 @@ async def handleMessage(message):
                 await message.add_reaction("🇨")
                 await message.add_reaction("🇪") 
     if len(message.content) > 0:
+        message.content = message.content.strip('|')
         prefix = tools.getMessagePrefix(message.content)
         content = tools.getMessageContent(message.content)
         recieveId = message.author.id
@@ -304,6 +312,8 @@ async def handleMessage(message):
             cmd = 1
             stat = prefix
             output = "pong"
+        elif prefix == "%chat":
+            output = chatgpt(content)
         elif message.content.lower() == "fuck you":
             output = 'Don\'t know how to "FUCK" something.'
         elif message.content.lower() == "eat pillow":
@@ -490,7 +500,8 @@ def initDatabases():
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
 OCR = os.getenv('OCR_SPACE')
-intents = discord.Intents.default()
+#intents = discord.Intents.default()
+intents = discord.Intents.all()
 intents.members = True
 client = discord.Client(intents=intents)
 initDatabases()
