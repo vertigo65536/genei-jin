@@ -304,6 +304,13 @@ async def handleMessage(message):
                 await message.add_reaction("🇨")
                 await message.add_reaction("🇪") 
     if len(message.content) > 0:
+        hashes = len(message.content) - len(message.content.lstrip('#'))
+        outputPrefix = ""
+        for i in range(hashes):
+            outputPrefix = outputPrefix + "#"
+        if hashes > 0:
+            outputPrefix = outputPrefix + " "
+        message.content = message.content.lstrip('#').lstrip(' ')
         message.content = message.content.strip('|')
         prefix = tools.getMessagePrefix(message.content)
         content = tools.getMessageContent(message.content)
@@ -375,7 +382,7 @@ async def handleMessage(message):
                         ]:
                 trophy = prefix
             stat = prefix
-            output = await search.createSearchPost(message)
+            output = await search.createSearchPost(message, outputPrefix)
         elif isLoneEmoji(message):
             cmd = 1
             trophy = "bigmoji"
@@ -518,7 +525,7 @@ async def on_message(message):
         return
     response = await handleMessage(message)
     if response != "" and response != None:
-        await message.channel.send(response)
+        await message.channel.send(prefix + response)
     else:
         return
 

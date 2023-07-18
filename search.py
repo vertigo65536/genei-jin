@@ -22,7 +22,7 @@ def updateQuery(id, db, newQuery, prefix):
 
 # parses and executes a search result query. Posts the result to discord
 
-async def createSearchPost(message):
+async def createSearchPost(message, outputPrefix=""):
     async with message.channel.typing():
         prefix = tools.getMessagePrefix(message.content)
         content = tools.getMessageContent(message.content)
@@ -43,6 +43,10 @@ async def createSearchPost(message):
         if error != 1 and results == -1:
             url = "no results you fucking cuck"
             error = 1
+    linesplit = url.split('\n')
+    for i in range(len(linesplit)):
+        linesplit[i] = outputPrefix + linesplit[i]
+    url = '\n'.join(linesplit)
     createdMessage = await message.channel.send(url, embed=e)
     f = open(getDatabase(), 'a')
     f.write(str(createdMessage.id) + "," + str(message.id) + "," + str(content) + "," + str(n) + "," + prefix + "\n")
