@@ -494,7 +494,12 @@ async def handleMessage(message):
         await getRedditLink(message)
         if stats.checkPlat(recieveId) == 1:
             await awardTrophy("plat", recieveId, message)
-    return output
+    outputSplit = output.split("\n")
+    for i in range(len(outputSplit)):
+        if outputSplit[i].replace(" ", "").strip() != "":
+            outputSplit[i] = outputPrefix + outputSplit[i]
+    output = "\n".join(outputSplit)
+    return outputPrefix + output
     
 
 # Initialises databases
@@ -525,7 +530,7 @@ async def on_message(message):
         return
     response = await handleMessage(message)
     if response != "" and response != None:
-        await message.channel.send(prefix + response)
+        await message.channel.send(response)
     else:
         return
 
