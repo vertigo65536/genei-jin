@@ -499,7 +499,7 @@ async def handleMessage(message):
         if outputSplit[i].replace(" ", "").strip() != "":
             outputSplit[i] = outputPrefix + outputSplit[i]
     output = "\n".join(outputSplit)
-    return outputPrefix + output
+    return output
     
 
 # Initialises databases
