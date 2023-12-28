@@ -6,7 +6,7 @@ from tools import updateCounter, searchResultsTest
 
 async def search(query, n, prefix=None): 
     async with aiohttp.ClientSession() as session:
-        async with session.get('http://www.youtube.com/results', params = {'q': query}, headers = {'Cookie': 'CONSENT=YES+GB.en+20151207-13-0'}) as r:
+        async with session.get('http://www.youtube.com/results', params = {'q': query}, headers = {'Cookie': 'CONSENT=PENDING+502'}) as r:
             if r.status != 200:
                 raise RuntimeError(f'{r.status} - {r.reason}')
             print(r)

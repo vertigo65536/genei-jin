@@ -1,11 +1,11 @@
 #!/bin/bash
 
-pip install discord --user || pip3 install discord --user
-pip install wikipedia --user || pip3 install wikipedia --user
-pip install you --user || pip3 install you --user
-pip install pokedex.py --user || pip3 install pokedex.py --user
-pip install python-dotenv --user || pip3 install python-dotenv --user
-pip install --user currencyconverter || pip3 install currencyconverter --user
+pipx install discord || pip3 install discord --user
+pipx install wikipedia || pip3 install wikipedia --user
+pipx install you || pip3 install you --user
+pipx install pokedex.py || pip3 install pokedex.py --user
+pipx install python-dotenv || pip3 install python-dotenv --user
+pipx install currencyconverter || pip3 install currencyconverter --user
 
 FILE=.env
 if [ ! -f "$FILE" ]; then

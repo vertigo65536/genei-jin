@@ -162,7 +162,9 @@ def getLuckyD(content):
 # Returns imfeelinglucky search result for Google
 
 def getLuckyG(content):
-    var = requests.get(r'https://www.google.com/search?btnI=1&q=' + urllib.parse.quote(content), headers = {"Referer": "http://www.google.com/", "Cookie": "CONSENT=YES+GB.en+20151207-13-0"}, allow_redirects=True)
+    s = requests.Session()
+    var = s.get(r'https://www.google.com/search?btnI=1&q=' + urllib.parse.quote(content), headers = {"Referer": "http://www.google.com", "Cookie" : "CONSENT=YES+999"}, allow_redirects=True)
+    print(var.cookies)
     return var.url.replace("https://www.google.com/url?q=", "")
 
 
