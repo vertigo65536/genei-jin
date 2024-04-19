@@ -339,7 +339,7 @@ async def handleMessage(message):
             output = 'Don\'t know how to "FUCK" something.'
         elif message.content.lower() == "eat pillow":
             output = "Yuck!"
-        elif prefix == "no":
+        elif prefix.lower() == "no":
             if message.content[-1] == '?':
                 await noBitches(message)
         elif prefix in [
