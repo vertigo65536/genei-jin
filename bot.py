@@ -192,6 +192,18 @@ async def sunnySub(message):
         os.remove(subtitle)
     return
 
+async def noBitches(message):
+    image = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'media', 'nobitches.png')
+    outputFile = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'media', 'nobitchesgenerated.png')
+    content = message.content.title()
+    imgMagickCmd = "convert " + image + " -background transparent -gravity North -fill white -stroke black -strokewidth 2 -font Impact -pointsize 50 -size 500x caption:'" + message.content.upper() + "' -composite " + outputFile
+    os.system(imgMagickCmd)
+    file = discord.File(outputFile, filename=content + ".png")
+    await message.channel.send(file=file)
+    if os.path.exists(outputFile):
+        os.remove(outputFile)
+    return
+
 
 # Returns an array of links to all subreddits in a string
 
@@ -327,6 +339,9 @@ async def handleMessage(message):
             output = 'Don\'t know how to "FUCK" something.'
         elif message.content.lower() == "eat pillow":
             output = "Yuck!"
+        elif prefix == "no":
+            if message.content[-1] == '?':
+                await noBitches(message)
         elif prefix in [
                     "%co",
                     "%co+",
