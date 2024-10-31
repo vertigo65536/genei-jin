@@ -349,6 +349,7 @@ async def handleMessage(message):
                     "%co=",
                     "%wiki",
                     "%yt",
+                    "%ss",
                     "%gi",
                     "%game",
                     "%yu",
@@ -374,6 +375,7 @@ async def handleMessage(message):
                 ]:
             cmd = 1
             if prefix not in  [
+                            "%ss",
                             "%game",
                             "%yu",
                             "%def",

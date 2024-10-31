@@ -1,6 +1,5 @@
 import csv, discord, os
-import tools, youtube, combio, wiki, gi, game, yugioh, dictionary, lego, gifglobe
-
+import tools, youtube, combio, wiki, gi, game, yugioh, dictionary, lego, gifglobe, scenesearch
 
 # Updates the database entry of result message with a new query value
 
@@ -31,6 +30,8 @@ async def createSearchPost(message, outputPrefix=""):
         error = 0
         searchType = getSearchType(prefix)
         e = None
+        results = await searchType.search(content, n, prefix)
+
         try:
             results = await searchType.search(content, n, prefix)
         except:
@@ -95,6 +96,8 @@ async def addSelectionArrows(message):
     await message.add_reaction("⏩")
 
 def getSearchType(prefix):
+    if prefix == "%ss":
+        return scenesearch
     if prefix == "%yt":
         return youtube
     if prefix == "%wiki":
