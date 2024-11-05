@@ -411,7 +411,7 @@ async def handleMessage(message):
                         ]:
                 trophy = prefix
             stat = prefix
-            output = await search.createSearchPost(message, outputPrefix, modifier=modifier)
+            output = await search.createSearchPost(message, outputPrefix)
         elif isLoneEmoji(message):
             cmd = 1
             trophy = "bigmoji"

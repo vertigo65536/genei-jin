@@ -9,7 +9,7 @@ async def search(message, n, prefix, modifier):
     if searchResultsTest(result, n) != 0:
         return searchResultsTest(result, n)
     result = result[n][1]
-    if method == None:
+    if modifier == None:
         ts = combio_api.getDefaultTimestamps(result)
     elif modifier == "+":
         timestamps = combio_api.getAllTimestamps(result)
@@ -21,7 +21,7 @@ async def search(message, n, prefix, modifier):
                 break;
         ts = {'ts1': startstamp,
               'ts2': endstamp}
-    elif method == "-":
+    elif modifier == "-":
         timestamps = combio_api.getAllTimestamps(result)
         startstamp = timestamps[2]['ts1']
         for i in range(len(timestamps)):
@@ -31,7 +31,7 @@ async def search(message, n, prefix, modifier):
                 break;
         ts = {'ts1': startstamp,
               'ts2': endstamp}
-    elif method == "=":
+    elif modifier == "=":
         timestamps = combio_api.getAllTimestamps(result)
         startstamp = timestamps[len(timestamps)//2]['ts1']
         for i in range(len(timestamps)//2):

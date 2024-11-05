@@ -21,15 +21,23 @@ def updateQuery(id, db, newQuery, prefix):
 
 # parses and executes a search result query. Posts the result to discord
 
-async def createSearchPost(message, outputPrefix="", modifier=None):
+async def createSearchPost(message, outputPrefix=""):
     async with message.channel.typing():
         prefix = tools.getMessagePrefix(message.content)
+        modifier = None
+        if prefix[-1] in ["+", "-", "=", "."]:
+            modifier = prefix[-1]
+            prefix = prefix[:-1]
+        print("!" + prefix + "!")
+        print(modifier)
         content = tools.getMessageContent(message.content)
         url = ""
         n = 0
         error = 0
         searchType = getSearchType(prefix)
         e = None
+        results = await searchType.search(content, n, prefix, modifier)
+        print(searchType)
         try:
             results = await searchType.search(content, n, prefix, modifier)
         except:
@@ -103,6 +111,7 @@ def getSearchType(prefix):
     if prefix == "%gi":
         return gi
     if prefix == "%co":
+        print("poopy")
         return combio
     if prefix == "%game":
         return game
