@@ -327,6 +327,11 @@ async def handleMessage(message):
         message.content = message.content.lstrip('#').lstrip(' ')
         message.content = message.content.strip('|')
         prefix = tools.getMessagePrefix(message.content)
+        if prefix[-1] in ["+", "-", "=", "."]:
+            modifier = prefix[-1]
+            prefix = prefix[:-1]
+        else:
+            modifier = None
         content = tools.getMessageContent(message.content)
         recieveId = message.author.id
         if prefix == "%ping":
@@ -344,12 +349,13 @@ async def handleMessage(message):
                 await noBitches(message)
         elif prefix in [
                     "%co",
-                    "%co+",
-                    "%co-",
-                    "%co=",
                     "%wiki",
                     "%yt",
                     "%ss",
+                    "%sp",
+                    "%avgn",
+                    "%pp",
+                    "%sunny",
                     "%gi",
                     "%game",
                     "%yu",
@@ -376,6 +382,10 @@ async def handleMessage(message):
             cmd = 1
             if prefix not in  [
                             "%ss",
+                            "%sp",
+                            "%avgn",
+                            "%pp",
+                            "%sunny",
                             "%game",
                             "%yu",
                             "%def",
@@ -401,7 +411,7 @@ async def handleMessage(message):
                         ]:
                 trophy = prefix
             stat = prefix
-            output = await search.createSearchPost(message, outputPrefix)
+            output = await search.createSearchPost(message, outputPrefix, modifier=modifier)
         elif isLoneEmoji(message):
             cmd = 1
             trophy = "bigmoji"

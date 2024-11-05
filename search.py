@@ -21,7 +21,7 @@ def updateQuery(id, db, newQuery, prefix):
 
 # parses and executes a search result query. Posts the result to discord
 
-async def createSearchPost(message, outputPrefix=""):
+async def createSearchPost(message, outputPrefix="", modifier=None):
     async with message.channel.typing():
         prefix = tools.getMessagePrefix(message.content)
         content = tools.getMessageContent(message.content)
@@ -30,10 +30,8 @@ async def createSearchPost(message, outputPrefix=""):
         error = 0
         searchType = getSearchType(prefix)
         e = None
-        results = await searchType.search(content, n, prefix)
-
         try:
-            results = await searchType.search(content, n, prefix)
+            results = await searchType.search(content, n, prefix, modifier)
         except:
             url = "No answer from server"
             error = 1
@@ -104,7 +102,7 @@ def getSearchType(prefix):
         return wiki
     if prefix == "%gi":
         return gi
-    if "%co" in prefix:
+    if prefix == "%co":
         return combio
     if prefix == "%game":
         return game
@@ -134,6 +132,13 @@ def getSearchType(prefix):
                 "%leagueofgentlemen"
             ]:
         return gifglobe
+    if prefix in [
+            "%sunny",
+            "%avgn",
+            "%pp",
+            "%sp"
+        ]:
+        return scenesearch
 
 
 async def increment(queryMessage, message, operation, db, user=None):

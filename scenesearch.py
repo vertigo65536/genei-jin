@@ -9,12 +9,15 @@ from bs4 import BeautifulSoup
 baseUrl = "https://scene.djwt.xyz/"
 
 
-async def search(query, n, prefix=None):
+async def search(query, n, prefix=None, modifier=None):
+    show = getShow(prefix)
     load_dotenv()
     TOKEN = os.getenv('SCENE_TOKEN')
     baseUrl = "https://scene.djwt.xyz/"
-    #baseUrl = "http://localhost:8000/"
-    url = baseUrl + "api/quote/" + query
+    if show == None:
+        url = baseUrl + "api/quote/" + query
+    else:
+        url = baseUrl + "api/quote/" + show + "/" + query
     headers = {
         'User-Agent':       'Mozilla/5.0 (X11; Linux x86_64; rv:132.0) Gecko/20100101 Firefox/132.0',
         'Authorization':    "Api-Key " + TOKEN,
@@ -22,6 +25,7 @@ async def search(query, n, prefix=None):
         "Accept":           "*/*",
         "Referer":          baseUrl
     }
+    print(url)
     with requests.Session() as session:
         session.get(baseUrl, headers=headers)
         response = requests.get(url, headers=headers)
@@ -30,7 +34,6 @@ async def search(query, n, prefix=None):
             n = n - len(responseJson)
         selectedQuote = responseJson[n]
         headers['Referer'] = baseUrl + "?q="+str(selectedQuote['quote_id'])+"&t=c&show=all"
-        #headers['X-CSRFToken'] = session.cookies['csrftoken']
         params = {
             'q':        selectedQuote['quote_id'],
             't':        'c',
@@ -43,3 +46,16 @@ async def search(query, n, prefix=None):
 
 async def getEmbed(results, colour):
     return None
+
+def getShow(prefix):
+    if "sunny" in prefix:
+        return "It's Always Sunny in Philadelphia"
+    if "avgn" in prefix:
+        return "Angry Video Game Nerd"
+    if "sp" in prefix:
+        return "South Park"
+    if "pp" in prefix:
+        return "Pure Pwnage"
+    else:
+        return None
+

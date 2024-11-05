@@ -4,15 +4,14 @@ from tools import updateCounter, searchResultsTest
 # Searches combio, returning a video url. Takes query and result number 
 # as params
 
-async def search(message, n, prefix):
-    method = getGenType(prefix)
+async def search(message, n, prefix, modifier):
     result = combio_api.search(message)
     if searchResultsTest(result, n) != 0:
         return searchResultsTest(result, n)
     result = result[n][1]
-    if method == 0:
+    if method == None:
         ts = combio_api.getDefaultTimestamps(result)
-    elif method == 1:
+    elif modifier == "+":
         timestamps = combio_api.getAllTimestamps(result)
         endstamp = timestamps[len(timestamps) - 2]['ts2']
         for i in range(len(timestamps)):
@@ -22,7 +21,7 @@ async def search(message, n, prefix):
                 break;
         ts = {'ts1': startstamp,
               'ts2': endstamp}
-    elif method == 2:
+    elif method == "-":
         timestamps = combio_api.getAllTimestamps(result)
         startstamp = timestamps[2]['ts1']
         for i in range(len(timestamps)):
@@ -32,7 +31,7 @@ async def search(message, n, prefix):
                 break;
         ts = {'ts1': startstamp,
               'ts2': endstamp}
-    elif method == 3:
+    elif method == "=":
         timestamps = combio_api.getAllTimestamps(result)
         startstamp = timestamps[len(timestamps)//2]['ts1']
         for i in range(len(timestamps)//2):
@@ -58,12 +57,3 @@ async def search(message, n, prefix):
 async def getEmbed(results, colour):
     return None
 
-def getGenType(prefix):
-    genType = 0
-    if prefix == "%co+":
-        genType = 1
-    if prefix == "%co-":
-        genType = 2
-    if prefix == "%co=":
-        genType = 3
-    return genType
