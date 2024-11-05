@@ -34,7 +34,7 @@ async def search(query, n, prefix=None, modifier=None):
             n = n - len(responseJson)
         selectedQuote = responseJson[n]
         headers['Referer'] = baseUrl + "?q="+str(selectedQuote['quote_id'])+"&t=c&show=all"
-        t = c
+        t = "c"
         if modifier == "+":
             t = "s"
         if modifier == "-":
