@@ -34,9 +34,18 @@ async def search(query, n, prefix=None, modifier=None):
             n = n - len(responseJson)
         selectedQuote = responseJson[n]
         headers['Referer'] = baseUrl + "?q="+str(selectedQuote['quote_id'])+"&t=c&show=all"
+        t = c
+        if modifier == "+":
+            t = "s"
+        if modifier == "-":
+            t = "e"
+        if modifier == "=":
+            t = "c"
+        if modifier == ".":
+            t = "j"
         params = {
             'q':        selectedQuote['quote_id'],
-            't':        'c',
+            't':        t,
             "show":     "all",
         }
         clip = session.post(baseUrl + "genclip/", data=params, headers=headers, cookies=session.cookies)
