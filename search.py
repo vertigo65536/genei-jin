@@ -28,8 +28,6 @@ async def createSearchPost(message, outputPrefix=""):
         if prefix[-1] in ["+", "-", "=", "."]:
             modifier = prefix[-1]
             prefix = prefix[:-1]
-        print("!" + prefix + "!")
-        print(modifier)
         content = tools.getMessageContent(message.content)
         url = ""
         n = 0
@@ -56,7 +54,7 @@ async def createSearchPost(message, outputPrefix=""):
     url = '\n'.join(linesplit)
     createdMessage = await message.channel.send(url, embed=e)
     f = open(getDatabase(), 'a')
-    f.write(str(createdMessage.id) + "," + str(message.id) + "," + str(content) + "," + str(n) + "," + prefix + "\n")
+    f.write(str(createdMessage.id) + "," + str(message.id) + "," + str(content) + "," + str(n) + "," + prefix + modifier + "\n")
     f.close()
     if error == 0 and prefix not in ["%def"]:
         await addSelectionArrows(createdMessage)
