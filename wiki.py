@@ -4,7 +4,7 @@ from tools import updateCounter, searchResultsTest
 # Searches wikipedia and returns a url, taking a message and result number
 # as values
 
-async def search(message, n, prefix=None):
+async def search(message, n, prefix=None, modifier=None):
     search = wikipedia.search(message)
     if searchResultsTest(search, n) != 0:
         return searchResultsTest(search, n)

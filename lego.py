@@ -25,7 +25,7 @@ def lego_search(query, fuzzy = False):
 # Searches youtube, taking a query and a result number as parameters
 # and returning a url
 
-async def search(query, n, prefix=None):
+async def search(query, n, prefix=None, modifier=None):
     result = lego_search(query)
     if isinstance(result, int) and result == -1:
         return -1

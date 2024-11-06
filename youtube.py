@@ -4,7 +4,7 @@ from tools import updateCounter, searchResultsTest
 # Searches youtube, taking a query and a result number as parameters
 # and returning a url
 
-async def search(query, n, prefix=None): 
+async def search(query, n, prefix=None, modifier=None): 
     async with aiohttp.ClientSession() as session:
         async with session.get('http://www.youtube.com/results', params = {'q': query}, headers = {'Cookie': 'CONSENT=PENDING+502'}) as r:
             if r.status != 200:

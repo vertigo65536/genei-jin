@@ -7,7 +7,7 @@ from bs4 import BeautifulSoup
 
 timeout = 30
 
-async def search(query, n, prefix=None):
+async def search(query, n, prefix=None, modifier=None):
     baseurl = '.gifglobe.com/'
     baseurl2 = '.cloud/'
     protocol = 'https://'

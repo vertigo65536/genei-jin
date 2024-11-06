@@ -6,7 +6,7 @@ from bs4 import BeautifulSoup
 # Searches wikipedia and returns a url, taking a message and result number
 # as values
 
-async def search(message, n, prefix=None):
+async def search(message, n, prefix=None, modifier=None):
     try:
         baseUrl = "https://www.dictionary.com"
         url = baseUrl + "/browse/" + urllib.parse.quote(message)

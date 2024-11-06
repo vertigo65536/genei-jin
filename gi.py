@@ -6,7 +6,7 @@ from tools import updateCounter
 # Search google images, taking a query and a result number as a parameter
 # and returning a URL
 
-async def search(message, n, prefix=None):
+async def search(message, n, prefix=None, modifier=None):
     if n < 0:
         return 40
     elif n > 40:

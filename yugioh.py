@@ -20,7 +20,7 @@ async def prices_search(query):
                 raise RuntimeError(f'{r.status} - {r.reason}')
             return await r.json()
 
-async def search(query, n, prefix=None):
+async def search(query, n, prefix=None, modifier=None):
     try:
         results = await ygo_search(query)
     except RuntimeError:

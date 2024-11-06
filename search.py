@@ -54,6 +54,8 @@ async def createSearchPost(message, outputPrefix=""):
     url = '\n'.join(linesplit)
     createdMessage = await message.channel.send(url, embed=e)
     f = open(getDatabase(), 'a')
+    if modifier == None:
+        modifier = ""
     f.write(str(createdMessage.id) + "," + str(message.id) + "," + str(content) + "," + str(n) + "," + prefix + modifier + "\n")
     f.close()
     if error == 0 and prefix not in ["%def"]:
@@ -155,18 +157,23 @@ async def increment(queryMessage, message, operation, db, user=None):
         newCounter = int(queryMessage[3])-1
     else:
         newCounter = 0
-    search = getSearchType(queryMessage[4])
-    results = await search.search(queryMessage[2], newCounter, queryMessage[4])
+    prefix = queryMessage[4]
+    modifier = None
+    if prefix[-1] in ["+", "-", "=", "."]:
+        modifier = prefix[-1]
+        prefix = prefix[:-1]
+    search = getSearchType(prefix)
+    results = await search.search(queryMessage[2], newCounter, prefix, modifier=modifier)
     if results == -1:
         return
     elif results == -2:
         newCounter = 0
-        results = await search.search(queryMessage[2], newCounter, queryMessage[4])
+        results = await search.search(queryMessage[2], newCounter, prefix, modifier=modifier)
     if 'n_value' in results:
         newCounter = results['n_value']
     elif isinstance(results, int):
         newCounter = results
-        results = await search.search(queryMessage[2], newCounter, queryMessage[4])
+        results = await search.search(queryMessage[2], newCounter, prefix, modifier=modifier)
     newUrl = None
     if user == None:
         colour = tools.getUserColour(message.author)
