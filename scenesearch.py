@@ -34,7 +34,7 @@ async def search(query, n, prefix=None, modifier=None):
             if responseJson['res'] == "Object matching quote does not exists":
                 return "No matches"
         except:
-            continue
+            pass
         while n >= len(responseJson):
             n = n - len(responseJson)
         selectedQuote = responseJson[n]
