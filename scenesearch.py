@@ -65,6 +65,8 @@ def getShow(prefix):
         return "South Park"
     if "pp" in prefix:
         return "Pure Pwnage"
+    if "sb" in prefix:
+        return "Spongebob Squarepants"
     else:
         return None
 
