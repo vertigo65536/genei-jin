@@ -30,8 +30,11 @@ async def search(query, n, prefix=None, modifier=None):
         session.get(baseUrl, headers=headers)
         response = requests.get(url, headers=headers)
         responseJson = response.json()
-        if responseJson['res'] == "Object matching quote does not exists":
-            return "No matches"
+        try:
+            if responseJson['res'] == "Object matching quote does not exists":
+                return "No matches"
+        except:
+            continue
         while n >= len(responseJson):
             n = n - len(responseJson)
         selectedQuote = responseJson[n]
