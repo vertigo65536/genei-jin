@@ -30,6 +30,8 @@ async def search(query, n, prefix=None, modifier=None):
         session.get(baseUrl, headers=headers)
         response = requests.get(url, headers=headers)
         responseJson = response.json()
+        if responseJson['res'] == "Object matching quote does not exists":
+            return "No matches"
         while n >= len(responseJson):
             n = n - len(responseJson)
         selectedQuote = responseJson[n]
@@ -57,6 +59,7 @@ async def getEmbed(results, colour):
     return None
 
 def getShow(prefix):
+    print(prefix)
     if "sunny" in prefix:
         return "It's Always Sunny in Philadelphia"
     if "avgn" in prefix:
