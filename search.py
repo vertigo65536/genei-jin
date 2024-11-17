@@ -130,7 +130,6 @@ def getSearchType(prefix):
                 "%daytoday",
                 "%bb",
                 "%blackbooks",
-                "%ap",
                 "%alanpartridge",
                 "%ps",
                 "%peepshow",
