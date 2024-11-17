@@ -73,6 +73,10 @@ def getShow(prefix):
         return "Pure Pwnage"
     if "sb" in prefix:
         return "Spongebob Squarepants"
+    if "bd" in prefix:
+        return "Black Dynamite"
+    if "ap" in prefix:
+        return "Airplane"
     else:
         return None
 
