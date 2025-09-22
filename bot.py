@@ -357,6 +357,7 @@ async def handleMessage(message):
                     "%pp",
                     "%sunny",
                     "%koth",
+                    "%sg",
                     "%sb",
                     "%bd",
                     "%ap",
@@ -385,6 +386,7 @@ async def handleMessage(message):
                 ]:
             cmd = 1
             if prefix not in  [
+                            "%sg",
                             "%ss",
                             "%sp",
                             "%avgn",

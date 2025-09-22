@@ -79,6 +79,8 @@ def getShow(prefix):
         return "Airplane"
     if "koth" in prefix:
         return "King of the Hill"
+    if "sg" in prefix:
+        return "Space Ghost"
     else:
         return None
 
