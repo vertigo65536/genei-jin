@@ -30,7 +30,7 @@ async def search(query, n, prefix=None, modifier=None):
             responseJson = response.json()
         except:
             responseJson = None
-        if responseJson == None:
+        if responseJson in [None, []]:
             return "No matches"
         while n >= len(responseJson):
             n = n - len(responseJson)
