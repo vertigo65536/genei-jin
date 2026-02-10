@@ -34,8 +34,6 @@ async def createSearchPost(message, outputPrefix=""):
         error = 0
         searchType = getSearchType(prefix)
         e = None
-        results = await searchType.search(content, n, prefix, modifier)
-        print(searchType)
         try:
             results = await searchType.search(content, n, prefix, modifier)
         except:
@@ -111,7 +109,6 @@ def getSearchType(prefix):
     if prefix == "%gi":
         return gi
     if prefix == "%co":
-        print("poopy")
         return combio
     if prefix == "%game":
         return game

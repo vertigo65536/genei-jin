@@ -1,6 +1,6 @@
 import os, re, requests, discord, json, time, urllib, csv, subprocess, aiohttp, openai
 import search, tools, stats
-from pokedex import pokedex
+#from pokedex import pokedex
 from bs4 import BeautifulSoup
 from dotenv import load_dotenv
 
@@ -385,39 +385,11 @@ async def handleMessage(message):
                     "%leagueofgentlemen"
                 ]:
             cmd = 1
-            if prefix not in  [
-                            "%sg",
-                            "%ss",
-                            "%sp",
-                            "%avgn",
-                            "%pp",
-                            "%sunny",
-                            "%koth",
-                            "%sb",
-                            "%bd",
-                            "%ap",
-                            "%game",
-                            "%yu",
-                            "%def",
-                            "%lego",
-                            "%ft",
-                            "%ft",
-                            "%fatherted",
-                            "%mb",
-                            "%mightyboosh",
-                            "%dt",
-                            "%daytoday",
-                            "%bb",
-                            "%blackbooks",
-                            "%ap",
-                            "%alanpartridge",
-                            "%ps",
-                            "%peepshow",
-                            "%office",
-                            "%toi",
-                            "%thickofit",
-                            "%log",
-                            "%leagueofgentlemen"
+            if prefix in  [
+                        "%co",
+                        "%wiki",
+                        "%yt",
+                        "%gi"
                         ]:
                 trophy = prefix
             stat = prefix
