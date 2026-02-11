@@ -357,6 +357,7 @@ async def handleMessage(message):
                     "%pp",
                     "%sunny",
                     "%koth",
+                    "%ad",
                     "%sg",
                     "%sb",
                     "%bd",

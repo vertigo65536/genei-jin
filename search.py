@@ -146,7 +146,8 @@ def getSearchType(prefix):
             "%bd",
             "%ap",
             "%sg",
-            "%koth"
+            "%koth",
+            "%ad"
         ]:
         return scenesearch
 
