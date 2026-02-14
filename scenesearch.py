@@ -81,6 +81,8 @@ def getShow(prefix):
         return "Space Ghost"
     if "ad" in prefix:
         return "Arrested Development"
+    if "seinfeld" in prefix:
+        return "Seinfeld"
     else:
         return "all"
 

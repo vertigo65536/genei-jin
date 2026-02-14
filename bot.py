@@ -360,6 +360,7 @@ async def handleMessage(message):
                     "%ad",
                     "%sg",
                     "%sb",
+                    "%seinfeld",
                     "%bd",
                     "%ap",
                     "%gi",
